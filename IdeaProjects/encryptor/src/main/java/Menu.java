@@ -8,9 +8,10 @@ import java.util.Scanner;
  */
 public class Menu {
     private static Menu instance = null;
-    private char encOption = 'e';
-    private char decOption = 'd';
-    private ResourceBundle strings = ResourceBundle.getBundle("strings");
+    private final char encOption = 'e';
+    private final char decOption = 'd';
+    private final char exOption = 'x';
+    private final ResourceBundle strings = ResourceBundle.getBundle("strings");
 
     /**
      * Private constructor which avoids instantiation
@@ -45,8 +46,9 @@ public class Menu {
             System.out.println(strings.getString("srcPathText"));
             filePathString = reader.nextLine();
             file = new File(filePathString);
-            // return a valid file object
-            if (file.canRead()) {
+            // return a valid file object (file size must be in int range)
+            if (file.canRead() && file.length() >= Integer.MIN_VALUE
+                    && file.length() <= Integer.MAX_VALUE) {
                 return file;
             } else {
                 System.out.println(strings.getString("inputErrorMsg"));
@@ -78,10 +80,16 @@ public class Menu {
             /*
             end the loop only when a valid answer is entered
              */
-            if (chosenOption.length() == 1
-                    && (chosenOption.charAt(0) == encOption
-                        || chosenOption.charAt(0) == decOption)) {
-                validOutput = true;
+            if (chosenOption.length() == 1) {
+                if (chosenOption.charAt(0) == encOption
+                        || chosenOption.charAt(0) == decOption) {
+                    validOutput = true;
+                } else if (chosenOption.charAt(0) == exOption) {
+                    return;
+                } else {
+                    System.out.println(strings.getString("inputErrorMsg"));
+                }
+
             } else {
                 System.out.println(strings.getString("inputErrorMsg"));
             }
