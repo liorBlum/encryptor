@@ -1,5 +1,6 @@
+package Structure;
 /**
- * Created by Lior on 27/05/2016.
+ * Test runner that runs all the tests
  */
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;

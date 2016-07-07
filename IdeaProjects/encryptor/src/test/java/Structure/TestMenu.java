@@ -1,15 +1,13 @@
+package Structure;
 /**
- * Created by Lior on 27/05/2016.
+ * Tests for the menu
  */
 import org.junit.Test;
-
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ResourceBundle;
-import java.util.Scanner;
 
 import static org.junit.Assert.assertEquals;
 
@@ -19,8 +17,9 @@ public class TestMenu {
     private final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     private final PrintStream psOut = new PrintStream(baos, true);
     private final ResourceBundle strings = ResourceBundle.getBundle("strings");
+    private final String ls = System.getProperty("line.separator");
     @Test
-    public void testInitialCommand() {
+    public void testInstantiation() {
         /*
         the first call will create the object,
          the second is supposed to return
@@ -28,17 +27,12 @@ public class TestMenu {
           */
         Menu menu1 = Menu.getInstance();
         Menu menu2 = Menu.getInstance();
-
-        //menu.showMenu();
-        //System.out.print(init_cmd);
-
         assertEquals(menu1, menu2);
     }
     @Test
     public void testMenuShouldAppear() {
         // the correct menu example
-        String init_cmd = strings.getString("menuText")
-                + System.getProperty("line.separator");
+        String menu_txt = strings.getString("menuText") + ls;
         String exit_cmd = "x";
         // check if menu appears correctly
         InputStream isIn = new ByteArrayInputStream(exit_cmd.getBytes());
@@ -50,6 +44,30 @@ public class TestMenu {
         // get back to original output stream
         System.setOut(defOutStream);
         System.setIn(defInStream);
-        assertEquals(init_cmd, baos.toString());
+        // check if te printed menu is equal to the expected one
+        assertEquals(menu_txt, baos.toString());
+
+    }
+    @Test
+    public void testInvalidInputs() {
+        String menu_txt = strings.getString("menuText") + ls;
+        String invalid_txt = strings.getString("inputErrorMsg") + ls;
+        String invalidInput1 = "a";
+        String invalidInput2 = "aaa";
+        String invalidInput3 = "3";
+        String exit_cmd = "x";
+        InputStream isIn = new ByteArrayInputStream((invalidInput1 + ls
+                + invalidInput2 + ls
+                + invalidInput3 + ls
+                + exit_cmd).getBytes());
+        String expectedOutput = menu_txt + invalid_txt + menu_txt + invalid_txt
+                + menu_txt + invalid_txt + menu_txt;
+        System.setOut(psOut);
+        System.setIn(isIn);
+        Menu menu = Menu.getInstance();
+        menu.showMenu();
+        System.setOut(defOutStream);
+        System.setIn(defInStream);
+        assertEquals(expectedOutput, baos.toString());
     }
 }

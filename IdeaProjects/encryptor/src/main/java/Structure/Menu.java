@@ -1,3 +1,4 @@
+package Structure;
 
 import java.io.File;
 import java.util.ResourceBundle;

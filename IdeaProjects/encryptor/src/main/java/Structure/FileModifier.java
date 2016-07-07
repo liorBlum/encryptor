@@ -1,3 +1,5 @@
+package Structure;
+
 import java.io.*;
 import java.util.ResourceBundle;
 

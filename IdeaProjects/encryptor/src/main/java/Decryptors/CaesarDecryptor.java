@@ -1,11 +1,13 @@
+package Decryptors;
+import Structure.FileModifier;
 import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
 
 /**
- * Created by Lior on 06/07/2016.
+ * Decryptor class used to decrypt input files using Caesar Algorithm.
  */
-public class Decryptor extends FileModifier {
+public class CaesarDecryptor extends FileModifier implements Decryptor {
     /**
      * Get a decryption key between 0 and 127 from the user input
      * @return the decryption key

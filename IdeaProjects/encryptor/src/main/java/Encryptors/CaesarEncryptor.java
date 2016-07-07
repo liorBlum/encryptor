@@ -1,12 +1,13 @@
-
-import java.io.*;
+package Encryptors;
+import Structure.FileModifier;
+import java.io.File;
+import java.io.IOException;
 import java.util.Random;
-import java.util.ResourceBundle;
 
 /**
  * Encryptor class used to encrypt input files using Caesar Algorithm.
  */
-public class Encryptor extends FileModifier {
+public class CaesarEncryptor extends FileModifier implements Encryptor {
     private Random randomizer = new Random();
     /**
      * get a file and encrypt it using "Caesar Algorithm".
