@@ -3,10 +3,8 @@ package Structure;
  * Tests for the menu
  */
 import org.junit.Test;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.PrintStream;
+
+import java.io.*;
 import java.util.ResourceBundle;
 
 import static org.junit.Assert.assertEquals;
@@ -49,7 +47,7 @@ public class TestMenu {
 
     }
     @Test
-    public void testInvalidInputs() {
+    public void testInvalidInputs() throws IOException{
         String menu_txt = strings.getString("menuText") + ls;
         String invalid_txt = strings.getString("inputErrorMsg") + ls;
         String invalidInput1 = "a";
@@ -68,6 +66,9 @@ public class TestMenu {
         menu.showMenu();
         System.setOut(defOutStream);
         System.setIn(defInStream);
+        psOut.close();
+        baos.close();
+        isIn.close();
         assertEquals(expectedOutput, baos.toString());
     }
 }
