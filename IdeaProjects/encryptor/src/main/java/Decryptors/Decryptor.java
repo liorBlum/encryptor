@@ -4,6 +4,7 @@ import Structure.FileModifier;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.util.Scanner;
 
 /**
@@ -18,20 +19,20 @@ public abstract class Decryptor extends FileModifier {
      */
     protected abstract byte decryptByte(byte b, byte key);
     /**
-     * Get a decryption key between 0 and 127 from the user input
+     * Get the encryption key between -128 and 127 from the user input
      * @return the decryption key
      */
-    protected byte getInputKey() {
+    protected byte getInputKey() throws InvalidParameterException {
         Scanner reader = new Scanner(System.in);
         String input;
         System.out.println(strings.getString("keyInputMsg"));
-        while (true) {
-            input = reader.nextLine();
-            if (Integer.parseInt(input) >= 0
-                    && Integer.parseInt(input) <= Byte.MAX_VALUE) {
-                return Byte.parseByte(input);
-            }
-            System.out.println(strings.getString("keyInputErrorMsg"));
+        input = reader.nextLine();
+        if (Integer.parseInt(input) >= Byte.MIN_VALUE
+                && Integer.parseInt(input) <= Byte.MAX_VALUE) {
+            return Byte.parseByte(input);
+        }
+        else {
+            throw new InvalidParameterException(strings.getString("keyInputErrorMsg"));
         }
     }
     /**
@@ -39,11 +40,19 @@ public abstract class Decryptor extends FileModifier {
      * @param inputFile an input file
      */
     public void decrypt(File inputFile) {
+        byte key;
         // initialize a byte array to contain decrypted bytes
         int fileLength = (int) inputFile.length();
         byte[] decryptedBytes = new byte[fileLength];
         // get a decryption key from the user
-        byte key = getInputKey();
+        while (true) {
+            try {
+                key = getInputKey();
+                break;
+            } catch (InvalidParameterException e) {
+                System.out.println(e.getMessage());
+            }
+        }
         // read the file and decrypt it byte by byte.
         readBytesFromFile(decryptedBytes, inputFile);
         for (int i = 0; i < fileLength; i++) {

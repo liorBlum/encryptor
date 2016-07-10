@@ -77,7 +77,6 @@ public abstract class AbstractEncTest {
         // receive the encryption key from System.out
         System.setOut(psOut);
         encryptor.encrypt(exampleFile);
-
         Byte key = Byte.parseByte(baos.toString().split(":")[1].trim());
         File encryptedFile = new File(exampleFile.getPath() + ".encrypted");
         // send the key to System.in (for the decryptor)

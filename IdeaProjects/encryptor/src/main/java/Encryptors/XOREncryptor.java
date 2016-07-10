@@ -11,10 +11,6 @@ public class XOREncryptor extends Encryptor {
      * @return encrypted byte.
      */
     protected byte encryptByte(byte b, byte key) {
-        // without a key, the method returns the original byte
-        if (key == -1) {
-            return b;
-        }
         return (byte) (b^key);
     }
 }

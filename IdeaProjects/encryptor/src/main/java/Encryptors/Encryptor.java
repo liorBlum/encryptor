@@ -13,6 +13,18 @@ public abstract class Encryptor extends FileModifier{
     protected Random randomizer = new Random();
 
     /**
+     * generate a random encryption key.
+     * @return encryption key
+     */
+    protected byte generateKey() {
+        // randomize a key between -128 and 127 (1 byte) and print it
+        byte key = (byte)(randomizer.nextInt(2*Byte.MAX_VALUE + 2)
+                + Byte.MIN_VALUE);
+        System.out.println(strings.getString("keyMsg") + " " + (int)key);
+        return key;
+    }
+
+    /**
      * Encrypt a byte with any encryption algorithm.
      * @param b input byte
      * @param key encryption key
@@ -24,9 +36,7 @@ public abstract class Encryptor extends FileModifier{
      * @param inputFile an input file
      */
     public void encrypt(File inputFile) {
-        // randomize a key between 0 and 127 (1 byte) and print it
-        byte key = (byte)randomizer.nextInt(Byte.MAX_VALUE + 1);
-        System.out.println(strings.getString("keyMsg") + " " + (int)key);
+        byte key = generateKey();
         // initialize a byte array to contain encrypted bytes
         int fileLength = (int)inputFile.length();
         byte[] encryptedBytes = new byte[fileLength];
