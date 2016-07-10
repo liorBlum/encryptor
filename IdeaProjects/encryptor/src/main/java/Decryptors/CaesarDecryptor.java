@@ -4,7 +4,7 @@ package Decryptors;
  */
 public class CaesarDecryptor extends Decryptor {
     /**
-     * Decrypt a byte with any encryption algorithm.
+     * Decrypt a byte with Caesar algorithm.
      * @param b input byte
      * @param key decryption key
      * @return decrypted byte.

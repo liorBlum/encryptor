@@ -26,7 +26,7 @@ public abstract class Encryptor extends FileModifier{
     public void encrypt(File inputFile) {
         // randomize a key between 0 and 127 (1 byte) and print it
         byte key = (byte)randomizer.nextInt(Byte.MAX_VALUE + 1);
-        System.out.println(strings.getString("keyMsg") + (int)key);
+        System.out.println(strings.getString("keyMsg") + " " + (int)key);
         // initialize a byte array to contain encrypted bytes
         int fileLength = (int)inputFile.length();
         byte[] encryptedBytes = new byte[fileLength];
