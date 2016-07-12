@@ -1,6 +1,7 @@
-package Encryptors;
+package TestEncryptors;
 
 import Decryptors.XORDecryptor;
+import Encryptors.XOREncryptor;
 import org.junit.Test;
 
 import java.io.IOException;

@@ -1,6 +1,7 @@
-package Encryptors;
+package TestEncryptors;
 
 import Decryptors.MwoDecryptor;
+import Encryptors.MwoEncryptor;
 import org.junit.Test;
 
 import java.io.IOException;

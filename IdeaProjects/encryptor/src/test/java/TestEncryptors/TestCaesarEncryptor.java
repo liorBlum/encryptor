@@ -1,6 +1,7 @@
-package Encryptors;
+package TestEncryptors;
 
 import Decryptors.CaesarDecryptor;
+import Encryptors.CaesarEncryptor;
 import org.junit.Test;
 
 import java.io.*;

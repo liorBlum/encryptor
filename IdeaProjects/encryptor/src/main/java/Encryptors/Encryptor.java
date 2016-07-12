@@ -1,6 +1,7 @@
 package Encryptors;
 
-import Structure.FileModifier;
+import Decryptors.Decryptor;
+import Utilities.FileModifier;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +32,12 @@ public abstract class Encryptor extends FileModifier{
      * @return encrypted byte.
      */
     protected abstract byte encryptByte(byte b, byte key);
+
+    /**
+     * Get the equivalent decryptor of this encryptor.
+     * @return equivalent decryptor
+     */
+    public abstract Decryptor getEquivalentDecryptor();
     /**
      * Encrypt an input file and write the result in a new file.
      * @param inputFile an input file
@@ -40,21 +47,19 @@ public abstract class Encryptor extends FileModifier{
         // initialize a byte array to contain encrypted bytes
         int fileLength = (int)inputFile.length();
         byte[] encryptedBytes = new byte[fileLength];
-        // read the file and encrypt it byte by byte.
-        readBytesFromFile(encryptedBytes, inputFile);
-        for (int i = 0; i < fileLength; i++) {
-            encryptedBytes[i] = encryptByte(encryptedBytes[i], key);
-        }
-        // write the encrypted bytes to a new file
-        File encryptedFile = new File(inputFile.getPath() + ".encrypted");
         try {
-            if (encryptedFile.createNewFile()) {
-                writeBytesToFile(encryptedBytes, encryptedFile);
-            } else {
-                System.out.println(strings.getString("fileReadErrorMsg"));
+            // read the file and encrypt it byte by byte.
+            readBytesFromFile(encryptedBytes, inputFile);
+            for (int i = 0; i < fileLength; i++) {
+                encryptedBytes[i] = encryptByte(encryptedBytes[i], key);
             }
+             // write the encrypted bytes to a new file
+            File encryptedFile = createFileInPath(inputFile.getPath()
+                    + ".encrypted");
+            writeBytesToFile(encryptedBytes, encryptedFile);
+
         } catch (IOException e) {
-            System.out.println(strings.getString("unexpectedErrorMsg"));
+            System.out.println(e.getMessage());
         }
     }
 }

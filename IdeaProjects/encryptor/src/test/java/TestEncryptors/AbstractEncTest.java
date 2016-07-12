@@ -1,6 +1,7 @@
-package Encryptors;
+package TestEncryptors;
 
 import Decryptors.Decryptor;
+import Encryptors.Encryptor;
 
 import java.io.*;
 import java.util.Arrays;
@@ -12,7 +13,7 @@ import static org.junit.Assert.assertTrue;
  * Abstract class for encryption types tests.
  */
 public abstract class AbstractEncTest {
-    private File exampleFile = new File("example_file_caesar.txt");
+    private File exampleFile = new File("example_file.txt");
     private String exampleStr = "Text Example 12345";
     private final PrintStream defOutStream = System.out;
     private final InputStream defInStream = System.in;

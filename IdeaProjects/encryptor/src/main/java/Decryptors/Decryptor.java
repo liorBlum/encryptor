@@ -1,6 +1,6 @@
 package Decryptors;
 
-import Structure.FileModifier;
+import Utilities.FileModifier;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,8 +22,8 @@ public abstract class Decryptor extends FileModifier {
      * Get the encryption key between -128 and 127 from the user input
      * @return the decryption key
      */
-    protected byte getInputKey() throws InvalidParameterException {
-        Scanner reader = new Scanner(System.in);
+    protected byte getInputKey(Scanner reader) throws
+            InvalidParameterException {
         String input;
         System.out.println(strings.getString("keyInputMsg"));
         input = reader.nextLine();
@@ -32,7 +32,8 @@ public abstract class Decryptor extends FileModifier {
             return Byte.parseByte(input);
         }
         else {
-            throw new InvalidParameterException(strings.getString("keyInputErrorMsg"));
+            throw new IllegalArgumentException(
+                    strings.getString("keyInputErrorMsg"));
         }
     }
     /**
@@ -40,6 +41,7 @@ public abstract class Decryptor extends FileModifier {
      * @param inputFile an input file
      */
     public void decrypt(File inputFile) {
+        Scanner reader = new Scanner(System.in);
         byte key;
         // initialize a byte array to contain decrypted bytes
         int fileLength = (int) inputFile.length();
@@ -47,33 +49,30 @@ public abstract class Decryptor extends FileModifier {
         // get a decryption key from the user
         while (true) {
             try {
-                key = getInputKey();
+                key = getInputKey(reader);
                 break;
-            } catch (InvalidParameterException e) {
+            } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             }
         }
-        // read the file and decrypt it byte by byte.
-        readBytesFromFile(decryptedBytes, inputFile);
-        for (int i = 0; i < fileLength; i++) {
-            decryptedBytes[i] = decryptByte(decryptedBytes[i], key);
-        }
-        // write the decrypted bytes to a new file
-        int fileExtIdx = inputFile.getPath().lastIndexOf('.');
-        if (fileExtIdx == -1) {
-            fileExtIdx = inputFile.getPath().length();
-        }
-        String fileName = inputFile.getPath().substring(0, fileExtIdx);
-        String fileExtension = inputFile.getPath().substring(fileExtIdx);
-        File decryptedFile = new File(fileName + "_decrypted" + fileExtension);
         try {
-            if (decryptedFile.createNewFile()) {
-                writeBytesToFile(decryptedBytes, decryptedFile);
-            } else {
-                System.out.println(strings.getString("fileReadErrorMsg"));
+            // read the file and decrypt it byte by byte.
+            readBytesFromFile(decryptedBytes, inputFile);
+            for (int i = 0; i < fileLength; i++) {
+                decryptedBytes[i] = decryptByte(decryptedBytes[i], key);
             }
+            // write the decrypted bytes to a new file
+            int fileExtIdx = inputFile.getPath().lastIndexOf('.');
+            if (fileExtIdx == -1) {
+                fileExtIdx = inputFile.getPath().length();
+            }
+            String fileName = inputFile.getPath().substring(0, fileExtIdx);
+            String fileExtension = inputFile.getPath().substring(fileExtIdx);
+            File decryptedFile = createFileInPath(fileName
+                    + "_decrypted" + fileExtension);
+            writeBytesToFile(decryptedBytes, decryptedFile);
         } catch (IOException e) {
-            System.out.println(strings.getString("unexpectedErrorMsg"));
+            System.out.println(e.getMessage());
         }
     }
 }

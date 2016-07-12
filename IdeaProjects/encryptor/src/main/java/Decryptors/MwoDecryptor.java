@@ -1,6 +1,7 @@
 package Decryptors;
 
 import java.security.InvalidParameterException;
+import java.util.Scanner;
 
 /**
  * Created by Lior on 10/07/2016.
@@ -11,11 +12,13 @@ public class MwoDecryptor extends Decryptor {
      * @return decryption key
      */
     @Override
-    protected byte getInputKey() throws InvalidParameterException {
-        byte encryptionKey = super.getInputKey();
+    protected byte getInputKey(Scanner reader) throws
+            InvalidParameterException {
+        byte encryptionKey = super.getInputKey(reader);
         // encryption key for MWO can't be even or 0
         if (encryptionKey == 0 || ((encryptionKey & 1) == 0)) {
-            throw new InvalidParameterException(strings.getString("keyMWOErrorMsg"));
+            throw new InvalidParameterException(
+                    strings.getString("keyMWOErrorMsg"));
         }
         int i;
         for (i = Byte.MIN_VALUE; i < Byte.MAX_VALUE; i++) {

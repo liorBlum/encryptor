@@ -2,9 +2,9 @@ package Structure;
 /**
  * Test runner that runs all the tests
  */
-import Encryptors.TestCaesarEncryptor;
-import Encryptors.TestMwoEncryptor;
-import Encryptors.TestXOREncryptor;
+import TestEncryptors.TestCaesarEncryptor;
+import TestEncryptors.TestMwoEncryptor;
+import TestEncryptors.TestXOREncryptor;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
