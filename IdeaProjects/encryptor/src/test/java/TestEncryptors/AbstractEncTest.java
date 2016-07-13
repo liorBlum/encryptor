@@ -1,10 +1,15 @@
 package TestEncryptors;
 
+import Decryptors.CaesarDecryptor;
 import Decryptors.Decryptor;
+import Encryptors.CaesarEncryptor;
 import Encryptors.Encryptor;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.ResourceBundle;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -19,6 +24,8 @@ public abstract class AbstractEncTest {
     private final InputStream defInStream = System.in;
     private final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     private final PrintStream psOut = new PrintStream(baos, true);
+    private final String ls = System.getProperty("line.separator");
+    private final ResourceBundle strings = ResourceBundle.getBundle("strings");
     private Encryptor encryptor;
     private Decryptor decryptor;
 
@@ -30,6 +37,16 @@ public abstract class AbstractEncTest {
     protected AbstractEncTest(Encryptor encryptor, Decryptor decryptor) {
         this.encryptor = encryptor;
         this.decryptor = decryptor;
+        encryptor.addObserver(new Observer() {
+            public void update(Observable o, Object arg) {
+                System.out.println(arg);
+            }
+        });
+        decryptor.addObserver(new Observer() {
+            public void update(Observable o, Object arg) {
+                System.out.println(arg);
+            }
+        });
     }
 
     /**
@@ -74,16 +91,26 @@ public abstract class AbstractEncTest {
      * @throws IOException
      */
     protected void testEncryption() throws IOException {
+        String observerMsgEnc = strings.getString("encStartMsg")
+                + ls + strings.getString("encEndMsg");
+        String observerMsgDec = strings.getString("decStartMsg")
+                + ls + strings.getString("decEndMsg");
         createExampleFile();
         // receive the encryption key from System.out
         System.setOut(psOut);
         encryptor.encrypt(exampleFile);
-        Byte key = Byte.parseByte(baos.toString().split(":")[1].trim());
+        String output = baos.toString();
+        assertTrue(output.endsWith(observerMsgEnc));
+        String keyDeclaration = output.split(observerMsgEnc)[1];
+
+        Byte key = Byte.parseByte(keyDeclaration.split(":")[1].trim());
         File encryptedFile = new File(exampleFile.getPath() + ".encrypted");
         // send the key to System.in (for the decryptor)
         InputStream isIn = new ByteArrayInputStream(key.toString().getBytes());
         System.setIn(isIn);
         decryptor.decrypt(encryptedFile);
+        output = baos.toString();
+        assertTrue(output.endsWith(observerMsgDec));
         System.setIn(defInStream);
         System.setOut(defOutStream);
         File decryptedFile = new File(exampleFile.getPath() + "_decrypted"

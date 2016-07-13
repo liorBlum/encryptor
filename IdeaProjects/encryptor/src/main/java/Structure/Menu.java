@@ -7,10 +7,7 @@ import Encryptors.MwoEncryptor;
 import Encryptors.XOREncryptor;
 
 import java.io.File;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.ResourceBundle;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Menu class with Singleton pattern
@@ -49,9 +46,22 @@ public class Menu {
     private void executeAction(char actionChar, File file, String algoCode) {
         Encryptor algorithm = encryptorsMap.get(algoCode);
         if (actionChar == encOption) {
+            // add an observer in order to notify
+            // the user when action started\ended
+            algorithm.addObserver(new Observer() {
+                public void update(Observable o, Object arg) {
+                    System.out.println(arg);
+                }
+            });
             algorithm.encrypt(file);
         } else {
-            algorithm.getEquivalentDecryptor().decrypt(file);
+            Decryptor decryptor = algorithm.getEquivalentDecryptor();
+            decryptor.addObserver(new Observer() {
+                public void update(Observable o, Object arg) {
+                    System.out.println(arg);
+                }
+            });
+            decryptor.decrypt(file);
         }
     }
 
@@ -162,12 +172,11 @@ public class Menu {
                 break;
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
-            } finally {
-                //reader.close();
             }
         }
         //if the user entered 'e', execute Encryption. Otherwise, decryption
         executeAction(chosenAction, inputFile, algoCode);
+        reader.close();
     }
 
 

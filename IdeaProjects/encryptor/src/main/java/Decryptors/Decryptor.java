@@ -56,6 +56,9 @@ public abstract class Decryptor extends FileModifier {
             }
         }
         try {
+            // notify observers that decryption started
+            setChanged();
+            notifyObservers(strings.getString("decStartMsg"));
             // read the file and decrypt it byte by byte.
             readBytesFromFile(decryptedBytes, inputFile);
             for (int i = 0; i < fileLength; i++) {
@@ -71,6 +74,9 @@ public abstract class Decryptor extends FileModifier {
             File decryptedFile = createFileInPath(fileName
                     + "_decrypted" + fileExtension);
             writeBytesToFile(decryptedBytes, decryptedFile);
+            // notify observers that decryption ended
+            setChanged();
+            notifyObservers(strings.getString("decEndMsg"));
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }

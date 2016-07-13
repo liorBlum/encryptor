@@ -1,4 +1,4 @@
-package Structure;
+package TestStructure;
 /**
  * Test runner that runs all the tests
  */

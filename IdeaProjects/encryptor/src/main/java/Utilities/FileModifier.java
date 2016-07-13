@@ -1,12 +1,13 @@
 package Utilities;
 
 import java.io.*;
+import java.util.Observable;
 import java.util.ResourceBundle;
 
 /**
  * An abstract class of file modifiers (encryptors and decryptors)
  */
-public abstract class FileModifier {
+public abstract class FileModifier extends Observable {
     protected final ResourceBundle strings =
             ResourceBundle.getBundle("strings");
 

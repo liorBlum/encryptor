@@ -10,7 +10,7 @@ import java.util.Random;
 /**
  * Abstract class for encryptors
  */
-public abstract class Encryptor extends FileModifier{
+public abstract class Encryptor extends FileModifier {
     protected Random randomizer = new Random();
 
     /**
@@ -48,6 +48,9 @@ public abstract class Encryptor extends FileModifier{
         int fileLength = (int)inputFile.length();
         byte[] encryptedBytes = new byte[fileLength];
         try {
+            // notify observers that encryption started
+            setChanged();
+            notifyObservers(strings.getString("encStartMsg"));
             // read the file and encrypt it byte by byte.
             readBytesFromFile(encryptedBytes, inputFile);
             for (int i = 0; i < fileLength; i++) {
@@ -57,7 +60,9 @@ public abstract class Encryptor extends FileModifier{
             File encryptedFile = createFileInPath(inputFile.getPath()
                     + ".encrypted");
             writeBytesToFile(encryptedBytes, encryptedFile);
-
+            // notify observers that encryption ended
+            setChanged();
+            notifyObservers(strings.getString("encEndMsg"));
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }

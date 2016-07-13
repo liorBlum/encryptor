@@ -1,7 +1,8 @@
-package Structure;
+package TestStructure;
 /**
  * Tests for the menu
  */
+import Structure.Menu;
 import org.junit.Test;
 
 import java.io.*;
