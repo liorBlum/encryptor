@@ -92,27 +92,29 @@ public abstract class AbstractEncTest {
      */
     protected void testEncryption() throws IOException {
         String observerMsgEnc = strings.getString("encStartMsg")
-                + ls + strings.getString("encEndMsg");
+                + ls + strings.getString("encEndMsg") + ls;
         String observerMsgDec = strings.getString("decStartMsg")
-                + ls + strings.getString("decEndMsg");
+                + ls + strings.getString("decEndMsg") + ls;
         createExampleFile();
         // receive the encryption key from System.out
         System.setOut(psOut);
         encryptor.encrypt(exampleFile);
+        System.setOut(defOutStream);
         String output = baos.toString();
         assertTrue(output.endsWith(observerMsgEnc));
-        String keyDeclaration = output.split(observerMsgEnc)[1];
+        String keyDeclaration = output.split(observerMsgEnc)[0];
 
         Byte key = Byte.parseByte(keyDeclaration.split(":")[1].trim());
         File encryptedFile = new File(exampleFile.getPath() + ".encrypted");
         // send the key to System.in (for the decryptor)
         InputStream isIn = new ByteArrayInputStream(key.toString().getBytes());
+        System.setOut(psOut);
         System.setIn(isIn);
         decryptor.decrypt(encryptedFile);
-        output = baos.toString();
-        assertTrue(output.endsWith(observerMsgDec));
         System.setIn(defInStream);
         System.setOut(defOutStream);
+        output = baos.toString();
+        assertTrue(output.endsWith(observerMsgDec));
         File decryptedFile = new File(exampleFile.getPath() + "_decrypted"
                 + ".encrypted");
         isIn.close();

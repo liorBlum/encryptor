@@ -164,10 +164,14 @@ public class Menu {
         while (true) {
             /*
             end the loop only when valid input is entered
+             or when 'x' is entered
              */
             try {
-                inputFile = getInputFile(reader);
                 chosenAction = getInputAction(reader);
+                if (chosenAction == exOption) {
+                    return;
+                }
+                inputFile = getInputFile(reader);
                 algoCode = getInputAlgorithm(reader);
                 break;
             } catch (IllegalArgumentException e) {
@@ -176,8 +180,5 @@ public class Menu {
         }
         //if the user entered 'e', execute Encryption. Otherwise, decryption
         executeAction(chosenAction, inputFile, algoCode);
-        reader.close();
     }
-
-
 }
