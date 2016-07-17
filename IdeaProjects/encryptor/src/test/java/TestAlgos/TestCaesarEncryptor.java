@@ -1,7 +1,6 @@
-package TestEncryptors;
+package TestAlgos;
 
-import Decryptors.CaesarDecryptor;
-import Encryptors.CaesarEncryptor;
+import Algorithms.CaesarAlgo;
 import org.junit.Test;
 
 import java.io.*;
@@ -11,7 +10,7 @@ import java.io.*;
  */
 public class TestCaesarEncryptor extends AbstractEncTest {
     public TestCaesarEncryptor() {
-        super(new CaesarEncryptor(), new CaesarDecryptor());
+        super(new CaesarAlgo());
     }
     @Test
     public void testCaesarEncryption() throws IOException{

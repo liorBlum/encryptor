@@ -1,11 +1,9 @@
 package Structure;
 
-import Decryptors.Decryptor;
-import Encryptors.CaesarEncryptor;
-import Encryptors.Encryptor;
-import Encryptors.MwoEncryptor;
-import Encryptors.XOREncryptor;
-
+import Algorithms.Algorithm;
+import Algorithms.CaesarAlgo;
+import Algorithms.MwoAlgo;
+import Algorithms.XORAlgo;
 import java.io.File;
 import java.util.*;
 
@@ -17,7 +15,7 @@ public class Menu {
     private final char encOption = 'e';
     private final char decOption = 'd';
     private final char exOption = 'x';
-    private HashMap<String,Encryptor> encryptorsMap;
+    private HashMap<String,Algorithm> algosMap;
     private final ResourceBundle strings =
             ResourceBundle.getBundle("strings");
     private final ResourceBundle algosCodes =
@@ -28,41 +26,39 @@ public class Menu {
      * and initializes encryptors map.
      */
     private Menu() {
-        encryptorsMap = new HashMap<String, Encryptor>();
-        encryptorsMap.put(algosCodes.getString("Caesar Algorithm"),
-                new CaesarEncryptor());
-        encryptorsMap.put(algosCodes.getString("XOR Algorithm"),
-                new XOREncryptor());
-        encryptorsMap.put(algosCodes.getString("Multiplication Algorithm"),
-                new MwoEncryptor());
+        algosMap = new HashMap<String, Algorithm>();
+        algosMap.put(algosCodes.getString("Caesar Algorithm"),
+                new CaesarAlgo());
+        algosMap.put(algosCodes.getString("XOR Algorithm"),
+                new XORAlgo());
+        algosMap.put(algosCodes.getString("Multiplication Algorithm"),
+                new MwoAlgo());
     }
 
     /**
-     * Execute encryption/decryption on a given file
+     * Execute encryption/decryption on a given file and print elapsed time.
      * @param actionChar action char('e'/'d')
      * @param file given file
      * @param algoCode String code of the requested encryption algorithm
      */
     private void executeAction(char actionChar, File file, String algoCode) {
-        Encryptor algorithm = encryptorsMap.get(algoCode);
+        Algorithm algorithm = algosMap.get(algoCode);
+        // add an observer in order to notify
+        // the user when action started\ended
+        algorithm.addObserver(new Observer() {
+            public void update(Observable o, Object arg) {
+                System.out.println(arg);
+            }
+        });
+        long elapsedTime = 0;
         if (actionChar == encOption) {
-            // add an observer in order to notify
-            // the user when action started\ended
-            algorithm.addObserver(new Observer() {
-                public void update(Observable o, Object arg) {
-                    System.out.println(arg);
-                }
-            });
-            algorithm.encrypt(file);
+            // execute action and measure the time it took
+            elapsedTime = algorithm.encrypt(file);
         } else {
-            Decryptor decryptor = algorithm.getEquivalentDecryptor();
-            decryptor.addObserver(new Observer() {
-                public void update(Observable o, Object arg) {
-                    System.out.println(arg);
-                }
-            });
-            decryptor.decrypt(file);
+            elapsedTime = algorithm.decrypt(file);
         }
+        System.out.println(strings.getString("elapsedTimeTxt") + " "
+                + (float)elapsedTime/1000000 + " milliseconds");
     }
 
     /**
@@ -81,15 +77,15 @@ public class Menu {
 
     /**
      * Get an encryption algorithm from the user
-     * @param reader
-     * @return
-     * @throws IllegalArgumentException
+     * @param reader input reader
+     * @return String code of the requested algorithm
+     * @throws IllegalArgumentException when input is illegal
      */
     private String getInputAlgorithm(Scanner reader) throws
             IllegalArgumentException {
         showAlgorithmsSelection();
         String input = reader.nextLine();
-        if (encryptorsMap.containsKey(input)) {
+        if (algosMap.containsKey(input)) {
             return input;
         } else {
             throw new IllegalArgumentException(
@@ -138,7 +134,7 @@ public class Menu {
             return file;
         } else {
             throw new IllegalArgumentException(
-                    strings.getString("inputErrorMsg"));
+                    this.strings.getString("inputErrorMsg"));
         }
     }
     /**

@@ -1,7 +1,6 @@
-package TestEncryptors;
+package TestAlgos;
 
-import Decryptors.MwoDecryptor;
-import Encryptors.MwoEncryptor;
+import Algorithms.MwoAlgo;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -9,9 +8,9 @@ import java.io.IOException;
 /**
  * Test class specified to test encryption using XOR Algorithm
  */
-public class TestMwoEncryptor extends AbstractEncTest {
-    public TestMwoEncryptor() {
-        super(new MwoEncryptor(), new MwoDecryptor());
+public class TestMwoAlgo extends AbstractEncTest {
+    public TestMwoAlgo() {
+        super(new MwoAlgo());
     }
     @Test
     public void testMwoEncryption() throws IOException {

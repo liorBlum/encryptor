@@ -5,10 +5,15 @@ import java.util.Observable;
 import java.util.ResourceBundle;
 
 /**
- * An abstract class of file modifiers (encryptors and decryptors)
+ * A utilities class of file modifying methods
  */
-public abstract class FileModifier extends Observable {
-    protected final ResourceBundle strings =
+public final class FileModifierUtils {
+    /**
+     * A private constructor to avoid instantiation
+     */
+    private FileModifierUtils() {}
+
+    private final static ResourceBundle strings =
             ResourceBundle.getBundle("strings");
 
     /**
@@ -18,7 +23,7 @@ public abstract class FileModifier extends Observable {
      * @return new file
      * @throws IOException if file exists or other IO error occurred
      */
-    protected File createFileInPath(String path) throws IOException {
+    public static File createFileInPath(String path) throws IOException {
         File newFile = new File(path);
         if (newFile.createNewFile()) {
             return newFile;
@@ -31,7 +36,7 @@ public abstract class FileModifier extends Observable {
      * @param bytes byte array
      * @param file a file
      */
-    protected void readBytesFromFile(byte[] bytes, File file) throws
+    public static void readBytesFromFile(byte[] bytes, File file) throws
             IOException{
         BufferedInputStream inputStream = null;
         try {
@@ -59,7 +64,7 @@ public abstract class FileModifier extends Observable {
      * @param file destination file
      * @throws IOException when file is not found or when write error occurs
      */
-    protected void writeBytesToFile(byte[] bytes, File file) throws
+    public static void writeBytesToFile(byte[] bytes, File file) throws
             IOException {
         BufferedOutputStream outputStream = null;
         try {
