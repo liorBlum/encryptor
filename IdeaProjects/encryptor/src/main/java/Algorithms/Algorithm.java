@@ -24,29 +24,23 @@ public abstract class Algorithm extends Observable {
      * @return the decryption key
      * @throws IOException when I/O error occurs
      */
-    protected byte getInputKey(Scanner reader) throws
-            Exception {
+    protected Key getInputKey(Scanner reader) throws
+            IOException {
         String input;
         System.out.println(strings.getString("keyInputMsg"));
         input = reader.nextLine();
-        return ((Key)SerializationUtils.deserializeObject(new File(input))).key;
+        return ((Key)SerializationUtils.deserializeObject(new File(input)));
     }
 
     /**
-     * Generate a random encryption key and serialize it.
-     * (save it as "key.bin"
-     *
+     * Generate a random encryption key between -128 and 127
      * @return encryption key
      */
-    protected byte generateKey(File encryptedFile) throws IOException{
-        // randomize a key between -128 and 127 (1 byte) and save it
+    protected Key generateKey() {
+        // randomize a key between -128 and 127 (1 byte) and return it
         byte key = (byte)(randomizer.nextInt(2*Byte.MAX_VALUE + 2)
                 + Byte.MIN_VALUE);
-        File keyFile = new File(encryptedFile.getParent(),
-                strings.getString("keyFileName"));
-        SerializationUtils.serializeObject(keyFile, new Key(key));
-        System.out.println(strings.getString("keyMsg"));
-        return key;
+        return new Key(key);
     }
 
     /**
@@ -55,7 +49,7 @@ public abstract class Algorithm extends Observable {
      * @param key encryption key
      * @return encrypted byte.
      */
-    protected abstract byte encryptByte(byte b, byte key);
+    protected abstract byte encryptByte(byte b, Key key);
 
     /**
      * Decrypt a byte with any encryption algorithm.
@@ -63,7 +57,7 @@ public abstract class Algorithm extends Observable {
      * @param key decryption key
      * @return decrypted byte.
      */
-    protected abstract byte decryptByte(byte b, byte key);
+    protected abstract byte decryptByte(byte b, Key key);
 
     /**
      * Encrypt an input file and write the result in a new file.
@@ -75,7 +69,13 @@ public abstract class Algorithm extends Observable {
         int fileLength = (int)inputFile.length();
         byte[] encryptedBytes = new byte[fileLength];
         try {
-            byte key = generateKey(inputFile);
+            // Generate a random encryption key and serialize it.
+             // (save it as "key.bin"
+            Key key = generateKey();
+            File keyFile = new File(inputFile.getParent(),
+                    strings.getString("keyFileName"));
+            SerializationUtils.serializeObject(keyFile, key);
+            System.out.println(strings.getString("keyMsg"));
             // notify observers that encryption started and measure time
             setChanged();
             notifyObservers(strings.getString("encStartMsg"));
@@ -96,6 +96,9 @@ public abstract class Algorithm extends Observable {
         } catch (IOException e) {
             System.out.println(e.getMessage());
             return 0;
+        } catch (Exception e) {
+            System.out.println(strings.getString("unexpectedErrorMsg"));
+            return 0;
         }
     }
 
@@ -106,7 +109,7 @@ public abstract class Algorithm extends Observable {
      */
     public long decrypt(File inputFile) {
         Scanner reader = new Scanner(System.in);
-        byte key;
+        Key key;
         // initialize a byte array to contain decrypted bytes
         int fileLength = (int) inputFile.length();
         byte[] decryptedBytes = new byte[fileLength];
