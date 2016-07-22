@@ -19,6 +19,7 @@ public class DoubleAlgo extends Algorithm {
         return new Key(algorithm1.generateKey().key,
                 algorithm2.generateKey().key);
     }
+
     @Override
     protected Key getInputKey(Scanner reader) throws
             IOException {
@@ -31,21 +32,31 @@ public class DoubleAlgo extends Algorithm {
                     strings.getString("doubleKeyErrorMsg"));
         }
     }
+
+    @Override
+    protected Key getDecryptionKey(Key encryptionKey) throws IOException {
+        if (encryptionKey.secondKey == null) {
+            throw new IOException(strings.getString("doubleKeyErrorMsg"));
+        }
+        Key algo1Key = new Key(encryptionKey.key);
+        Key algo2Key = new Key(encryptionKey.secondKey);
+        return new Key(algorithm1.getDecryptionKey(algo1Key).key,
+                        algorithm2.getDecryptionKey(algo2Key).key);
+    }
+
     /**
      * Encrypt a byte with Double algorithm.
      * @param b input byte
      * @param keyObject encryption key (includes the two keys)
      * @return encrypted byte.
+     * @throws IOException when key is not dual
      */
-    protected byte encryptByte(byte b, Key keyObject) {
-        Key firstKey = new Key(keyObject.key);
-        Key secondKey;
-        // if only one key is entered, use the same key for both algorithm
+    protected byte encryptByte(byte b, Key keyObject) throws IOException {
         if (keyObject.secondKey == null) {
-            secondKey = firstKey;
-        } else {
-            secondKey = new Key(keyObject.secondKey);
+            throw new IOException(strings.getString("doubleKeyErrorMsg"));
         }
+        Key firstKey = new Key(keyObject.key);
+        Key secondKey = new Key(keyObject.secondKey);
         // encrypt the byte with the first algorithm and then the second one
         return algorithm2.encryptByte(algorithm1.encryptByte(b, firstKey),
                 secondKey);
@@ -56,18 +67,16 @@ public class DoubleAlgo extends Algorithm {
      * @param b input byte
      * @param keyObject decryption key (includes the two keys)
      * @return decrypted byte.
+     * @throws IOException when key is not dual
      */
-    protected byte decryptByte(byte b, Key keyObject) {
-        Key firstKey = new Key(keyObject.key);
-        Key secondKey;
-        // if only one key is entered, use the same key for both algorithm
+    protected byte decryptByte(byte b, Key keyObject) throws IOException {
         if (keyObject.secondKey == null) {
-            secondKey = firstKey;
-        } else {
-            secondKey = new Key(keyObject.secondKey);
+            throw new IOException(strings.getString("doubleKeyErrorMsg"));
         }
+        Key firstKey = new Key(keyObject.key);
+        Key secondKey = new Key(keyObject.secondKey);
         // decrypt the byte with the second algorithm and then the first one
-        return algorithm1.encryptByte(algorithm2.encryptByte(b, secondKey),
+        return algorithm1.decryptByte(algorithm2.decryptByte(b, secondKey),
                 firstKey);
     }
 }

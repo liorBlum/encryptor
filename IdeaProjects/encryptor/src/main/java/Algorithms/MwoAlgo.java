@@ -24,18 +24,25 @@ public class MwoAlgo extends Algorithm {
         if (encryptionKey == 0 || ((encryptionKey & 1) == 0)) {
             throw new InvalidParameterException(
                     strings.getString("keyMWOErrorMsg"));
+        } else {
+            return new Key(encryptionKey);
         }
+    }
+
+    @Override
+    protected Key getDecryptionKey(Key encryptionKey) throws IOException {
         int i;
+        byte encKeyByte = encryptionKey.key;
         // find and return decryption key
         for (i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
-            if ((byte)(encryptionKey * i) == 1) {
+            if ((byte)(encKeyByte * i) == 1) {
                 return new Key((byte)i);
             }
         }
         // if all bytes in range (min - (max)) are not decryption key,
         // throw an exception
-        throw new InvalidParameterException(
-                strings.getString("keyMWOErrorMsg"));
+        throw new IOException(
+                strings.getString("unexpectedErrorMsg"));
     }
 
     @Override

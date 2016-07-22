@@ -10,7 +10,7 @@ import java.io.IOException;
  */
 public class TestXORAlgo extends AbstractEncTest {
         public TestXORAlgo() {
-            super(new XORAlgo());
+            super(new XORAlgo(), "XOR Algorithm");
         }
         @Test
         public void testXOREncryption() throws IOException {

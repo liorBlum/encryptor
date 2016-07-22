@@ -7,6 +7,8 @@ import java.io.Serializable;
  * Serializable class that holds a key/keys
  */
 public class Key implements Serializable {
+    public final Byte key;
+    public final Byte secondKey;
     /**
      * Construct a Key object with only one valid key
      * @param key only key
@@ -25,6 +27,4 @@ public class Key implements Serializable {
         this.key = key1;
         this.secondKey = key2;
     }
-    public final Byte key;
-    public final Byte secondKey;
 }

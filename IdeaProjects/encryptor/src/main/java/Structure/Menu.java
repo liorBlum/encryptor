@@ -4,6 +4,8 @@ import Algorithms.Algorithm;
 import Algorithms.CaesarAlgo;
 import Algorithms.MwoAlgo;
 import Algorithms.XORAlgo;
+import Utilities.UserInputUtils;
+
 import java.io.File;
 import java.util.*;
 
@@ -12,9 +14,9 @@ import java.util.*;
  */
 public class Menu {
     private static Menu instance = null;
-    private final char encOption = 'e';
-    private final char decOption = 'd';
-    private final char exOption = 'x';
+    private final String encOption = "e";
+    private final String decOption = "d";
+    private final String exOption = "x";
     private HashMap<String,Algorithm> algosMap;
     private final ResourceBundle strings =
             ResourceBundle.getBundle("strings");
@@ -37,11 +39,11 @@ public class Menu {
 
     /**
      * Execute encryption/decryption on a given file and print elapsed time.
-     * @param actionChar action char('e'/'d')
+     * @param actionCode action char('e'/'d')
      * @param file given file
      * @param algoCode String code of the requested encryption algorithm
      */
-    private void executeAction(char actionChar, File file, String algoCode) {
+    private void executeAction(String actionCode, File file, String algoCode) {
         Algorithm algorithm = algosMap.get(algoCode);
         // add an observer in order to notify
         // the user when action started\ended
@@ -50,8 +52,8 @@ public class Menu {
                 System.out.println(arg);
             }
         });
-        long elapsedTime = 0;
-        if (actionChar == encOption) {
+        long elapsedTime;
+        if (actionCode.equals(encOption)) {
             // execute action and measure the time it took
             elapsedTime = algorithm.encrypt(file);
         } else {
@@ -76,68 +78,6 @@ public class Menu {
     }
 
     /**
-     * Get an encryption algorithm from the user
-     * @param reader input reader
-     * @return String code of the requested algorithm
-     * @throws IllegalArgumentException when input is illegal
-     */
-    private String getInputAlgorithm(Scanner reader) throws
-            IllegalArgumentException {
-        showAlgorithmsSelection();
-        String input = reader.nextLine();
-        if (algosMap.containsKey(input)) {
-            return input;
-        } else {
-            throw new IllegalArgumentException(
-                    strings.getString("inputErrorMsg"));
-        }
-    }
-    /**
-     * Get action from the user input (enc/dec/exit)
-     * @param reader input reader
-     * @return action char
-     * @throws IllegalArgumentException if input is invalid
-     */
-    private char getInputAction(Scanner reader) throws
-            IllegalArgumentException {
-        System.out.println(strings.getString("menuText"));
-        String input = reader.nextLine();
-        if (input.length() == 1) {
-            char action = input.charAt(0);
-            if (action == encOption || action == decOption
-                    || action == exOption) {
-                return action;
-            } else {
-                throw new IllegalArgumentException(
-                        strings.getString("inputErrorMsg"));
-            }
-        } else {
-            throw new IllegalArgumentException(
-                    strings.getString("inputErrorMsg"));
-        }
-    }
-    /**
-     * Get a file path from the user and return the file
-     * which is denoted by that filepath.
-     * @param reader command line input reader
-     * @return file which is denoted by the given filepath
-     * @throws IllegalArgumentException if input is invalid
-     */
-    private File getInputFile(Scanner reader)
-            throws IllegalArgumentException {
-        System.out.println(strings.getString("srcPathText"));
-        String filePathString = reader.nextLine();
-        File file;
-        file = new File(filePathString);
-        // return a valid file object (file size must be in int range)
-        if (file.canRead() && file.length() <= Integer.MAX_VALUE) {
-            return file;
-        } else {
-            throw new IllegalArgumentException(
-                    this.strings.getString("inputErrorMsg"));
-        }
-    }
-    /**
      * Get the single Menu object
      * @return Menu object
      */
@@ -153,22 +93,25 @@ public class Menu {
      * between encryption and decryption
      */
     public void showMenu() {
-        Scanner reader = new Scanner(System.in);
-        char chosenAction;
+        String chosenAction;
         File inputFile;
         String algoCode;
         while (true) {
             /*
             end the loop only when valid input is entered
-             or when 'x' is entered
+             or when "x" is entered
              */
             try {
-                chosenAction = getInputAction(reader);
-                if (chosenAction == exOption) {
+                System.out.println(strings.getString("menuText"));
+                chosenAction = UserInputUtils.getInputFromList(
+                        Arrays.asList(encOption, decOption, exOption));
+                if (chosenAction.equals(exOption)) {
                     return;
                 }
-                inputFile = getInputFile(reader);
-                algoCode = getInputAlgorithm(reader);
+                // get file path and algorithm from the user
+                inputFile = UserInputUtils.getInputFile();
+                showAlgorithmsSelection();
+                algoCode = UserInputUtils.getInputFromList(algosMap.keySet());
                 break;
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());

@@ -19,8 +19,7 @@ public abstract class Algorithm extends Observable {
     protected Random randomizer = new Random();
 
     /**
-     * Get the file path of the decryption key between -128 and 127
-     * from the user input
+     * Get the file path of the encryption key from the user input
      * @return the decryption key
      * @throws IOException when I/O error occurs
      */
@@ -32,6 +31,16 @@ public abstract class Algorithm extends Observable {
         return ((Key)SerializationUtils.deserializeObject(new File(input)));
     }
 
+    /**
+     * Compute the decryption key using its respective encryption key.
+     * By default, encryption key == decryption key
+     * @param encryptionKey encryption key
+     * @return decryption key
+     * @throws IOException when key is invalid
+     */
+    protected Key getDecryptionKey(Key encryptionKey) throws IOException {
+        return encryptionKey;
+    }
     /**
      * Generate a random encryption key between -128 and 127
      * @return encryption key
@@ -48,16 +57,18 @@ public abstract class Algorithm extends Observable {
      * @param b input byte
      * @param key encryption key
      * @return encrypted byte.
+     * @throws IOException when key is invalid
      */
-    protected abstract byte encryptByte(byte b, Key key);
+    protected abstract byte encryptByte(byte b, Key key) throws IOException;
 
     /**
      * Decrypt a byte with any encryption algorithm.
      * @param b input byte
      * @param key decryption key
      * @return decrypted byte.
+     * @throws IOException when key is invalid
      */
-    protected abstract byte decryptByte(byte b, Key key);
+    protected abstract byte decryptByte(byte b, Key key) throws IOException;
 
     /**
      * Encrypt an input file and write the result in a new file.
@@ -116,7 +127,7 @@ public abstract class Algorithm extends Observable {
         // get a decryption key from the user
         while (true) {
             try {
-                key = getInputKey(reader);
+                key = getDecryptionKey(getInputKey(reader));
                 break;
             } catch (Exception e) {
                 System.out.println(e.getMessage());

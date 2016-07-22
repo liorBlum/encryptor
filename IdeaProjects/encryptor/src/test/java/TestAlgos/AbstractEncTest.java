@@ -15,16 +15,18 @@ import static org.junit.Assert.assertTrue;
  */
 public abstract class AbstractEncTest {
     private File exampleFile = new File("example_file.txt");
-    private String exampleStr = "Text Example 12345";
     private final InputStream defInStream = System.in;
     private final ResourceBundle strings = ResourceBundle.getBundle("strings");
     private Algorithm algorithm;
+    protected String algoName;
 
     /**
      * A constructor for all encryption tests.
      * @param algorithm encryption algorithm to be tested
+     * @param name algorithm's name
      */
-    protected AbstractEncTest(Algorithm algorithm) {
+    protected AbstractEncTest(Algorithm algorithm, String name) {
+        this.algoName = name;
         this.algorithm = algorithm;
         algorithm.addObserver(new Observer() {
             public void update(Observable o, Object arg) {
@@ -39,6 +41,7 @@ public abstract class AbstractEncTest {
      * @throws IOException
      */
     protected void createExampleFile() throws IOException{
+        String exampleStr = "Text Example 12345";
         if (exampleFile.createNewFile()) {
             FileWriter fw = new FileWriter(exampleFile);
             fw.write(exampleStr);
@@ -75,6 +78,7 @@ public abstract class AbstractEncTest {
      * @throws IOException
      */
     protected void testEncryption() throws IOException {
+        System.out.println("Testing " + algoName + "...");
         createExampleFile();
         // encrypt the example file
         long elapsedTime = algorithm.encrypt(exampleFile);
@@ -102,5 +106,6 @@ public abstract class AbstractEncTest {
         // delete the encrypted and decrypted files
         encryptedFile.delete();
         decryptedFile.delete();
+        System.out.println(algoName + " test completed successfully.");
     }
 }
