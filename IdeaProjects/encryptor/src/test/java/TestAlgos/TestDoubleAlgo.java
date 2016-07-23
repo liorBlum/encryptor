@@ -10,7 +10,7 @@ import java.io.IOException;
  */
 public class TestDoubleAlgo extends AbstractEncTest {
     public TestDoubleAlgo() {
-        super(new DoubleAlgo(new CaesarAlgo(), new MwoAlgo()), "Double Algorithm");
+        super(new DoubleAlgo(), "Double Algorithm");
     }
     @Test
     public void testDoubleEncryption() throws IOException {

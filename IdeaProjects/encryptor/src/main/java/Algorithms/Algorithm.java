@@ -16,6 +16,8 @@ import java.util.Scanner;
 public abstract class Algorithm extends Observable {
     protected final static ResourceBundle strings =
             ResourceBundle.getBundle("strings");
+    protected final static ResourceBundle independentAlgosCodes =
+            ResourceBundle.getBundle("indep_algorithms");
     protected Random randomizer = new Random();
 
     /**

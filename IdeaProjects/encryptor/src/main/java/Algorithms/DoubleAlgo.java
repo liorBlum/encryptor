@@ -1,5 +1,10 @@
 package Algorithms;
+import Structure.Menu;
+import Utilities.UserInputUtils;
+
+import java.io.File;
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Scanner;
 
 /**
@@ -9,9 +14,49 @@ import java.util.Scanner;
 public class DoubleAlgo extends Algorithm {
     private Algorithm algorithm1;
     private Algorithm algorithm2;
-    public DoubleAlgo(Algorithm algorithm1, Algorithm algorithm2) {
-        this.algorithm1 = algorithm1;
-        this.algorithm2 = algorithm2;
+
+    /**
+     * Display all independent algorithms found in properties
+     */
+    private void showIndepAlgorithmsSelection() {
+        Enumeration<String> indepAlgorithms = independentAlgosCodes.getKeys();
+        // go over all algorithms and print them as choices
+        while (indepAlgorithms.hasMoreElements()) {
+            String algo = indepAlgorithms.nextElement();
+            System.out.println("For " + algo + " Enter: "
+                    + independentAlgosCodes.getString(algo));
+        }
+    }
+
+    /**
+     * Get valid algorithm from the user input. The algorithm
+     * must be 'independent algorithm', an algorithm which does not
+     * depend on any other algorithm (in order to avoid infinite loops
+     * of algorithms calls
+     * @return independent algorithm (object)
+     */
+    private Algorithm getIndepAlgorithmFromUser() {
+        while (true) {
+            try {
+                String algoCode = UserInputUtils.getValidUserInput(
+                        Menu.indepAlgosMap.keySet());
+                return Menu.indepAlgosMap.get(algoCode);
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Update Algorithm member(s) of this dependent algorithm
+     */
+    public void updateAlgorithmMembers() {
+        System.out.println(strings.getString("doubleAlgoMsg"));
+        showIndepAlgorithmsSelection();
+        System.out.println('\n' + strings.getString("firstAlgoMsg"));
+        algorithm1 = getIndepAlgorithmFromUser();
+        System.out.println(strings.getString("secondAlgoMsg"));
+        algorithm2 = getIndepAlgorithmFromUser();
     }
 
     @Override
@@ -78,5 +123,17 @@ public class DoubleAlgo extends Algorithm {
         // decrypt the byte with the second algorithm and then the first one
         return algorithm1.decryptByte(algorithm2.decryptByte(b, secondKey),
                 firstKey);
+    }
+
+    @Override
+    public long encrypt(File inputFile) {
+        updateAlgorithmMembers();
+        return super.encrypt(inputFile);
+    }
+
+    @Override
+    public long decrypt(File inputFile) {
+        updateAlgorithmMembers();
+        return super.decrypt(inputFile);
     }
 }

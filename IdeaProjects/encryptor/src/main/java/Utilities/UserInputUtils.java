@@ -18,13 +18,13 @@ public class UserInputUtils {
     private final static Scanner reader = new Scanner(System.in);
 
     /**
-     * Get an input from the user and return it only if it is
+     * Get an input from the user (String) and return it only if it is
      * included in the valid inputs list
      * @param validInputs valid inputs list
      * @return input string
      * @throws IllegalArgumentException when input is illegal
      */
-    public static String getInputFromList(Collection<String> validInputs) throws
+    public static String getValidUserInput(Collection<String> validInputs) throws
             IllegalArgumentException {
         String input = reader.nextLine();
         if (validInputs.contains(input)) {
