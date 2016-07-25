@@ -32,9 +32,11 @@ public final class SerializationUtils {
             // write the object to the file and close streams
             objectOut.writeObject(object);
         } catch (FileNotFoundException e) {
-            throw new FileNotFoundException(strings.getString("inputErrorMsg"));
+            throw new FileNotFoundException(
+                    strings.getString("inputErrorMsg"));
         } catch (IOException e) {
-            throw new IOException(strings.getString("fileWriteErrorMsg"));
+            throw new IOException(
+                    strings.getString("fileWriteErrorMsg"));
         } finally {
             try {
                 if (fileOut != null) {

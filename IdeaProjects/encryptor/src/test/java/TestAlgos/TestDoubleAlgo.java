@@ -3,7 +3,9 @@ package TestAlgos;
 import Algorithms.*;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Test class specified to test encryption using Double Algorithm
@@ -14,6 +16,12 @@ public class TestDoubleAlgo extends AbstractEncTest {
     }
     @Test
     public void testDoubleEncryption() throws IOException {
-        super.testEncryption();
+        // send requested algorithms to algorithm test
+        InputStream isIn = new ByteArrayInputStream(
+                ("csr" + System.getProperty("line.separator")
+                        + "mwo").getBytes());
+        System.setIn(isIn);
+        super.testAlgorithm();
+        System.setIn(defInStream);
     }
 }

@@ -15,7 +15,7 @@ import static org.junit.Assert.assertTrue;
  */
 public abstract class AbstractEncTest {
     private File exampleFile = new File("example_file.txt");
-    private final InputStream defInStream = System.in;
+    protected final InputStream defInStream = System.in;
     private final ResourceBundle strings = ResourceBundle.getBundle("strings");
     private Algorithm algorithm;
     protected String algoName;
@@ -77,7 +77,7 @@ public abstract class AbstractEncTest {
      * any encryption algorithm
      * @throws IOException
      */
-    protected void testEncryption() throws IOException {
+    protected void testAlgorithm() throws IOException {
         System.out.println("Testing " + algoName + "...");
         createExampleFile();
         // encrypt the example file
@@ -106,6 +106,6 @@ public abstract class AbstractEncTest {
         // delete the encrypted and decrypted files
         encryptedFile.delete();
         decryptedFile.delete();
-        System.out.println(algoName + " test completed successfully.");
+        System.out.println(algoName + " test completed successfully.\n");
     }
 }

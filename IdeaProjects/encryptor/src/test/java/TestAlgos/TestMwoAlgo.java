@@ -14,6 +14,6 @@ public class TestMwoAlgo extends AbstractEncTest {
     }
     @Test
     public void testMwoEncryption() throws IOException {
-        super.testEncryption();
+        super.testAlgorithm();
     }
 }

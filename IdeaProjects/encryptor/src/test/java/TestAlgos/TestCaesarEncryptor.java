@@ -14,6 +14,6 @@ public class TestCaesarEncryptor extends AbstractEncTest {
     }
     @Test
     public void testCaesarEncryption() throws IOException{
-        super.testEncryption();
+        super.testAlgorithm();
     }
 }

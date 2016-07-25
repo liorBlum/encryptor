@@ -14,7 +14,7 @@ public class TestRunner {
     public static void main(String[] args) {
         Result result = JUnitCore.runClasses(TestMenu.class,
                TestCaesarEncryptor.class, TestXORAlgo.class,
-                TestMwoAlgo.class, TestDoubleAlgo.class);
+                TestMwoAlgo.class);
         for (Failure failure : result.getFailures()) {
             System.out.println(failure.toString());
         }

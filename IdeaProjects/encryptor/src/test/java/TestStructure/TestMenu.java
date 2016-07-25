@@ -28,25 +28,7 @@ public class TestMenu {
         Menu menu2 = Menu.getInstance();
         assertEquals(menu1, menu2);
     }
-    @Test
-    public void testMenuShouldAppear() {
-        // the correct menu example
-        String menu_txt = strings.getString("menuText") + ls;
-        String exit_cmd = "x";
-        // check if menu appears correctly
-        InputStream isIn = new ByteArrayInputStream(exit_cmd.getBytes());
-        // sent prints to psOut instead of console and input to isIn
-        System.setOut(psOut);
-        System.setIn(isIn);
-        Menu menu = Menu.getInstance();
-        menu.showMenu();
-        // get back to original output stream
-        System.setOut(defOutStream);
-        System.setIn(defInStream);
-        // check if te printed menu is equal to the expected one
-        assertEquals(menu_txt, baos.toString());
 
-    }
     @Test
     public void testInvalidInputs() throws IOException{
         String menu_txt = strings.getString("menuText") + ls;
@@ -67,9 +49,7 @@ public class TestMenu {
         menu.showMenu();
         System.setOut(defOutStream);
         System.setIn(defInStream);
-        psOut.close();
-        baos.close();
-        isIn.close();
         assertEquals(expectedOutput, baos.toString());
+        psOut.close();
     }
 }

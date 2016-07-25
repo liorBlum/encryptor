@@ -2,7 +2,6 @@ package Structure;
 
 import Algorithms.*;
 import Utilities.UserInputUtils;
-
 import java.io.File;
 import java.util.*;
 
@@ -32,14 +31,18 @@ public class Menu {
      * and initializes algorithms map.
      */
     private Menu() {
-        indepAlgosMap.put(independentAlgosCodes.getString("Caesar Algorithm"),
-                new CaesarAlgo());
-        indepAlgosMap.put(independentAlgosCodes.getString("XOR Algorithm"),
-                new XORAlgo());
-        indepAlgosMap.put(independentAlgosCodes.getString("Multiplication Algorithm"),
-                new MwoAlgo());
-        depAlgosMap.put(dependentAlgosCodes.getString("Double Algorithm"),
-                new DoubleAlgo());
+        indepAlgosMap.put(independentAlgosCodes.getString(
+                "Caesar Algorithm"), new CaesarAlgo());
+        indepAlgosMap.put(independentAlgosCodes.getString(
+                "XOR Algorithm"), new XORAlgo());
+        indepAlgosMap.put(independentAlgosCodes.getString(
+                "Multiplication Algorithm"), new MwoAlgo());
+        depAlgosMap.put(dependentAlgosCodes.getString(
+                "Double Algorithm"), new DoubleAlgo());
+        depAlgosMap.put(dependentAlgosCodes.getString(
+                "Reverse Algorithm"), new ReverseAlgo());
+        depAlgosMap.put(dependentAlgosCodes.getString(
+                "Split Algorithm"), new SplitAlgo());
         allAlgosMap.putAll(indepAlgosMap);
         allAlgosMap.putAll(depAlgosMap);
     }
@@ -68,8 +71,12 @@ public class Menu {
         } else {
             elapsedTime = algorithm.decrypt(file);
         }
-        System.out.println(strings.getString("elapsedTimeTxt") + " "
-                + (float)elapsedTime/1000000 + " milliseconds");
+        if (elapsedTime == 0) {
+            System.out.println(strings.getString("generalErrorMsg"));
+        } else {
+            System.out.println(strings.getString("elapsedTimeTxt") + " "
+                    + (float) elapsedTime / 1000000 + " milliseconds");
+        }
     }
 
     /**
@@ -124,9 +131,11 @@ public class Menu {
                     return;
                 }
                 // get file path and algorithm from the user
+                System.out.println(strings.getString("srcPathText"));
                 inputFile = UserInputUtils.getInputFile();
                 showAlgorithmsSelection();
-                algoCode = UserInputUtils.getValidUserInput(allAlgosMap.keySet());
+                algoCode = UserInputUtils.getValidUserInput(
+                        allAlgosMap.keySet());
                 break;
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());

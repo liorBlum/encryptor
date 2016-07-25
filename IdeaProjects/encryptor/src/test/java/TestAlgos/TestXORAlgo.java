@@ -14,7 +14,7 @@ public class TestXORAlgo extends AbstractEncTest {
         }
         @Test
         public void testXOREncryption() throws IOException {
-            super.testEncryption();
+            super.testAlgorithm();
         }
 
 }

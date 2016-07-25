@@ -15,7 +15,7 @@ public class UserInputUtils {
     private UserInputUtils() {}
     private final static ResourceBundle strings =
             ResourceBundle.getBundle("strings");
-    private final static Scanner reader = new Scanner(System.in);
+    public final static Scanner reader = new Scanner(System.in);
 
     /**
      * Get an input from the user (String) and return it only if it is
@@ -43,7 +43,6 @@ public class UserInputUtils {
      */
     public static File getInputFile()
             throws IllegalArgumentException {
-        System.out.println(strings.getString("srcPathText"));
         String filePathString = reader.nextLine();
         File file;
         file = new File(filePathString);

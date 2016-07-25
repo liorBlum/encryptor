@@ -2,13 +2,13 @@ package Algorithms;
 
 import Utilities.FileModifierUtils;
 import Utilities.SerializationUtils;
+import Utilities.UserInputUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Observable;
 import java.util.Random;
 import java.util.ResourceBundle;
-import java.util.Scanner;
 
 /**
  * Abstract class for encryptors
@@ -16,8 +16,6 @@ import java.util.Scanner;
 public abstract class Algorithm extends Observable {
     protected final static ResourceBundle strings =
             ResourceBundle.getBundle("strings");
-    protected final static ResourceBundle independentAlgosCodes =
-            ResourceBundle.getBundle("indep_algorithms");
     protected Random randomizer = new Random();
 
     /**
@@ -25,24 +23,13 @@ public abstract class Algorithm extends Observable {
      * @return the decryption key
      * @throws IOException when I/O error occurs
      */
-    protected Key getInputKey(Scanner reader) throws
-            IOException {
-        String input;
+    protected Key getInputKey() throws
+            Exception {
         System.out.println(strings.getString("keyInputMsg"));
-        input = reader.nextLine();
-        return ((Key)SerializationUtils.deserializeObject(new File(input)));
+        return ((Key)SerializationUtils.deserializeObject(
+                UserInputUtils.getInputFile()));
     }
 
-    /**
-     * Compute the decryption key using its respective encryption key.
-     * By default, encryption key == decryption key
-     * @param encryptionKey encryption key
-     * @return decryption key
-     * @throws IOException when key is invalid
-     */
-    protected Key getDecryptionKey(Key encryptionKey) throws IOException {
-        return encryptionKey;
-    }
     /**
      * Generate a random encryption key between -128 and 127
      * @return encryption key
@@ -55,22 +42,36 @@ public abstract class Algorithm extends Observable {
     }
 
     /**
-     * Encrypt a byte with any encryption algorithm.
-     * @param b input byte
-     * @param key encryption key
-     * @return encrypted byte.
+     * Compute the decryption key using its respective encryption key.
+     * By default, encryption key == decryption key
+     * @param encryptionKey encryption key
+     * @return decryption key
      * @throws IOException when key is invalid
      */
-    protected abstract byte encryptByte(byte b, Key key) throws IOException;
+    protected Key getDecryptionKey(Key encryptionKey) throws Exception {
+        return encryptionKey;
+    }
+
+    /**
+     * Encrypt a byte with any encryption algorithm.
+     * @param b input byte
+     * @param idx byte's index in file
+     *@param key encryption key  @return encrypted byte.
+     * @throws IOException when key is invalid
+     */
+    protected abstract byte encryptByte(byte b, int idx, Key key)
+            throws IOException;
 
     /**
      * Decrypt a byte with any encryption algorithm.
      * @param b input byte
+     * @param idx byte's index in file
      * @param key decryption key
      * @return decrypted byte.
      * @throws IOException when key is invalid
      */
-    protected abstract byte decryptByte(byte b, Key key) throws IOException;
+    protected abstract byte decryptByte(byte b, int idx, Key key)
+            throws IOException;
 
     /**
      * Encrypt an input file and write the result in a new file.
@@ -96,7 +97,7 @@ public abstract class Algorithm extends Observable {
             // read the file and encrypt it byte by byte.
             FileModifierUtils.readBytesFromFile(encryptedBytes, inputFile);
             for (int i = 0; i < fileLength; i++) {
-                encryptedBytes[i] = encryptByte(encryptedBytes[i], key);
+                encryptedBytes[i] = encryptByte(encryptedBytes[i], i, key);
             }
              // write the encrypted bytes to a new file
             File encryptedFile = FileModifierUtils.createFileInPath(
@@ -121,7 +122,6 @@ public abstract class Algorithm extends Observable {
      * @return the exact time the decryption process took
      */
     public long decrypt(File inputFile) {
-        Scanner reader = new Scanner(System.in);
         Key key;
         // initialize a byte array to contain decrypted bytes
         int fileLength = (int) inputFile.length();
@@ -129,7 +129,7 @@ public abstract class Algorithm extends Observable {
         // get a decryption key from the user
         while (true) {
             try {
-                key = getDecryptionKey(getInputKey(reader));
+                key = getDecryptionKey(getInputKey());
                 break;
             } catch (Exception e) {
                 System.out.println(e.getMessage());
@@ -143,7 +143,7 @@ public abstract class Algorithm extends Observable {
             // read the file and decrypt it byte by byte.
             FileModifierUtils.readBytesFromFile(decryptedBytes, inputFile);
             for (int i = 0; i < fileLength; i++) {
-                decryptedBytes[i] = decryptByte(decryptedBytes[i], key);
+                decryptedBytes[i] = decryptByte(decryptedBytes[i], i, key);
             }
             // write the decrypted bytes to a new file
             int fileExtIdx = inputFile.getPath().lastIndexOf('.');

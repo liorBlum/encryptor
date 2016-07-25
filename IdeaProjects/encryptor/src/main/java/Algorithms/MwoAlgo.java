@@ -1,11 +1,5 @@
 package Algorithms;
 
-import Utilities.SerializationUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.security.InvalidParameterException;
-import java.util.Scanner;
 
 /**
  * Algorithm class used to encrypt/decrypt input files
@@ -17,12 +11,12 @@ public class MwoAlgo extends Algorithm {
      * @return decryption key
      */
     @Override
-    protected Key getInputKey(Scanner reader) throws
-            IOException {
-        byte encryptionKey = super.getInputKey(reader).key;
+    protected Key getInputKey() throws
+            Exception {
+        byte encryptionKey = super.getInputKey().key;
         // encryption key for MWO can't be even or 0
         if (encryptionKey == 0 || ((encryptionKey & 1) == 0)) {
-            throw new InvalidParameterException(
+            throw new IllegalArgumentException (
                     strings.getString("keyMWOErrorMsg"));
         } else {
             return new Key(encryptionKey);
@@ -30,7 +24,12 @@ public class MwoAlgo extends Algorithm {
     }
 
     @Override
-    protected Key getDecryptionKey(Key encryptionKey) throws IOException {
+    protected Key getDecryptionKey(Key encryptionKey) throws Exception {
+        // encryption key for MWO can't be even or 0
+        if (encryptionKey.key == 0 || ((encryptionKey.key & 1) == 0)) {
+            throw new IllegalArgumentException(
+                    strings.getString("keyMWOErrorMsg"));
+        }
         int i;
         byte encKeyByte = encryptionKey.key;
         // find and return decryption key
@@ -41,7 +40,7 @@ public class MwoAlgo extends Algorithm {
         }
         // if all bytes in range (min - (max)) are not decryption key,
         // throw an exception
-        throw new IOException(
+        throw new RuntimeException(
                 strings.getString("unexpectedErrorMsg"));
     }
 
@@ -53,23 +52,14 @@ public class MwoAlgo extends Algorithm {
                 + Byte.MIN_VALUE/2) * 2 + 1);
         return new Key(key);
     }
-    /**
-     * Encrypt a byte with Multiplication algorithm.
-     * @param b input byte
-     * @param keyObject encryption key
-     * @return encrypted byte.
-     */
-    protected byte encryptByte(byte b, Key keyObject) {
+
+    @Override
+    protected byte encryptByte(byte b, int idx, Key keyObject) {
         return (byte) (b * keyObject.key);
     }
 
-    /**
-     * Decrypt a byte with Multiplication algorithm.
-     * @param b input byte
-     * @param keyObject decryption key
-     * @return decrypted byte.
-     */
-    protected byte decryptByte(byte b, Key keyObject) {
+    @Override
+    protected byte decryptByte(byte b, int idx, Key keyObject) {
         return (byte) (b * keyObject.key);
     }
 
