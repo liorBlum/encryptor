@@ -1,6 +1,7 @@
 package Algorithms;
 
 import java.io.IOException;
+import java.util.Scanner;
 
 /**
  * Algorithm class used to encrypt/decrypt input files
@@ -11,13 +12,13 @@ public class DoubleAlgo extends DependentAlgorithm {
     private Algorithm algorithm2;
 
     @Override
-    protected void updateAlgorithmMembers() {
+    protected void updateAlgorithmMembers(Scanner reader) {
         System.out.println(strings.getString("doubleAlgoMsg"));
         showIndepAlgorithmsSelection();
         System.out.println('\n' + strings.getString("firstAlgoMsg"));
-        algorithm1 = getIndepAlgorithmFromUser();
+        algorithm1 = getIndepAlgorithmFromUser(reader);
         System.out.println(strings.getString("secondAlgoMsg"));
-        algorithm2 = getIndepAlgorithmFromUser();
+        algorithm2 = getIndepAlgorithmFromUser(reader);
     }
 
     @Override
@@ -27,10 +28,10 @@ public class DoubleAlgo extends DependentAlgorithm {
     }
 
     @Override
-    protected Key getInputKey() throws
+    protected Key getInputKey(Scanner reader) throws
             Exception {
         // if the key object does not contain two keys, throw an exception
-        Key inputKey = super.getInputKey();
+        Key inputKey = super.getInputKey(reader);
         if (inputKey.secondKey != null) {
             return inputKey;
         } else {

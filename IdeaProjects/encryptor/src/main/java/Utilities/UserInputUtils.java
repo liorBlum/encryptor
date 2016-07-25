@@ -15,17 +15,19 @@ public class UserInputUtils {
     private UserInputUtils() {}
     private final static ResourceBundle strings =
             ResourceBundle.getBundle("strings");
-    public final static Scanner reader = new Scanner(System.in);
+    //public final static Scanner reader = new Scanner(System.in);
 
     /**
      * Get an input from the user (String) and return it only if it is
      * included in the valid inputs list
      * @param validInputs valid inputs list
+     * @param reader System.in scanner
      * @return input string
      * @throws IllegalArgumentException when input is illegal
      */
-    public static String getValidUserInput(Collection<String> validInputs) throws
-            IllegalArgumentException {
+    public static String getValidUserInput(Collection<String> validInputs,
+                                           Scanner reader) throws
+                                            IllegalArgumentException {
         String input = reader.nextLine();
         if (validInputs.contains(input)) {
             return input;
@@ -38,10 +40,11 @@ public class UserInputUtils {
     /**
      * Get a file path from the user and return the file
      * which is denoted by that filepath.
+     * @param reader System.in scanner
      * @return file which is denoted by the given filepath
      * @throws IllegalArgumentException if input is invalid
      */
-    public static File getInputFile()
+    public static File getInputFile(Scanner reader)
             throws IllegalArgumentException {
         String filePathString = reader.nextLine();
         File file;

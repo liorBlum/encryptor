@@ -8,7 +8,7 @@ import java.io.IOException;
 /**
  * Test class specified to test encryption using XOR Algorithm
  */
-public class TestXORAlgo extends AbstractEncTest {
+public class TestXORAlgo extends AbstractAlgoTest {
         public TestXORAlgo() {
             super(new XORAlgo(), "XOR Algorithm");
         }

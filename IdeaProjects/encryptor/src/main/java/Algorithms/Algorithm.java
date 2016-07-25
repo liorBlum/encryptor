@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.Observable;
 import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.Scanner;
 
 /**
  * Abstract class for encryptors
@@ -20,14 +21,15 @@ public abstract class Algorithm extends Observable {
 
     /**
      * Get the file path of the encryption key from the user input
+     * @param reader System.in scanner
      * @return the decryption key
      * @throws IOException when I/O error occurs
      */
-    protected Key getInputKey() throws
+    protected Key getInputKey(Scanner reader) throws
             Exception {
         System.out.println(strings.getString("keyInputMsg"));
         return ((Key)SerializationUtils.deserializeObject(
-                UserInputUtils.getInputFile()));
+                UserInputUtils.getInputFile(reader)));
     }
 
     /**
@@ -78,7 +80,7 @@ public abstract class Algorithm extends Observable {
      * @param inputFile an input file
      * @return the exact time the encryption process began
      */
-    public long encrypt(File inputFile) {
+    public long encrypt(File inputFile, Scanner reader) {
         // initialize a byte array to contain encrypted bytes
         int fileLength = (int)inputFile.length();
         byte[] encryptedBytes = new byte[fileLength];
@@ -121,7 +123,7 @@ public abstract class Algorithm extends Observable {
      * @param inputFile an input file.
      * @return the exact time the decryption process took
      */
-    public long decrypt(File inputFile) {
+    public long decrypt(File inputFile, Scanner reader) {
         Key key;
         // initialize a byte array to contain decrypted bytes
         int fileLength = (int) inputFile.length();
@@ -129,7 +131,7 @@ public abstract class Algorithm extends Observable {
         // get a decryption key from the user
         while (true) {
             try {
-                key = getDecryptionKey(getInputKey());
+                key = getDecryptionKey(getInputKey(reader));
                 break;
             } catch (Exception e) {
                 System.out.println(e.getMessage());

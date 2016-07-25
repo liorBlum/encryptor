@@ -1,6 +1,7 @@
 package Algorithms;
 
 import java.io.IOException;
+import java.util.Scanner;
 
 /**
  * Created by Lior on 25/07/2016.
@@ -9,10 +10,10 @@ public class SplitAlgo extends DependentAlgorithm {
     private Algorithm algorithm;
 
     @Override
-    protected void updateAlgorithmMembers() {
+    protected void updateAlgorithmMembers(Scanner reader) {
         System.out.println(strings.getString("splitMsg"));
         showIndepAlgorithmsSelection();
-        algorithm = getIndepAlgorithmFromUser();
+        algorithm = getIndepAlgorithmFromUser(reader);
     }
 
     @Override

@@ -9,6 +9,7 @@ import java.util.*;
  * Menu class with Singleton pattern
  */
 public class Menu {
+    Scanner reader = new Scanner(System.in);
     private static Menu instance = null;
     private final String encOption = "e";
     private final String decOption = "d";
@@ -55,7 +56,7 @@ public class Menu {
      * @param algoCode String code of the requested encryption algorithm
      */
     private void executeAlgorithm(String actionCode, File file,
-                                        String algoCode) {
+                                        String algoCode, Scanner reader) {
         Algorithm algorithm = allAlgosMap.get(algoCode);
         // add an observer in order to notify
         // the user when action started\ended
@@ -67,9 +68,9 @@ public class Menu {
         long elapsedTime;
         if (actionCode.equals(encOption)) {
             // execute action and measure the time it took
-            elapsedTime = algorithm.encrypt(file);
+            elapsedTime = algorithm.encrypt(file, reader);
         } else {
-            elapsedTime = algorithm.decrypt(file);
+            elapsedTime = algorithm.decrypt(file, reader);
         }
         if (elapsedTime == 0) {
             System.out.println(strings.getString("generalErrorMsg"));
@@ -115,6 +116,7 @@ public class Menu {
      * between encryption and decryption
      */
     public void showMenu() {
+        Scanner reader = new Scanner(System.in);
         String chosenAction;
         File inputFile;
         String algoCode;
@@ -126,22 +128,22 @@ public class Menu {
             try {
                 System.out.println(strings.getString("menuText"));
                 chosenAction = UserInputUtils.getValidUserInput(
-                        Arrays.asList(encOption, decOption, exOption));
+                        Arrays.asList(encOption, decOption, exOption), reader);
                 if (chosenAction.equals(exOption)) {
                     return;
                 }
                 // get file path and algorithm from the user
                 System.out.println(strings.getString("srcPathText"));
-                inputFile = UserInputUtils.getInputFile();
+                inputFile = UserInputUtils.getInputFile(reader);
                 showAlgorithmsSelection();
                 algoCode = UserInputUtils.getValidUserInput(
-                        allAlgosMap.keySet());
+                        allAlgosMap.keySet(), reader);
                 break;
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             }
         }
         //if the user entered 'e', execute Encryption. Otherwise, decryption
-        executeAlgorithm(chosenAction, inputFile, algoCode);
+        executeAlgorithm(chosenAction, inputFile, algoCode, reader);
     }
 }

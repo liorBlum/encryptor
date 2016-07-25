@@ -6,6 +6,7 @@ import Utilities.UserInputUtils;
 import java.io.File;
 import java.util.Enumeration;
 import java.util.ResourceBundle;
+import java.util.Scanner;
 
 /**
  * Abstract class for dependent algorithms. These algorithms have
@@ -17,7 +18,7 @@ public abstract class DependentAlgorithm extends Algorithm {
     /**
      * Update Algorithm member(s) of this dependent algorithm
      */
-    protected abstract void updateAlgorithmMembers();
+    protected abstract void updateAlgorithmMembers(Scanner reader);
 
     /**
      * Display all independent algorithms found in properties
@@ -39,11 +40,11 @@ public abstract class DependentAlgorithm extends Algorithm {
      * of algorithms calls
      * @return independent algorithm (object)
      */
-    protected Algorithm getIndepAlgorithmFromUser() {
+    protected Algorithm getIndepAlgorithmFromUser(Scanner reader) {
         while (true) {
             try {
                 String algoCode = UserInputUtils.getValidUserInput(
-                        Menu.indepAlgosMap.keySet());
+                        Menu.indepAlgosMap.keySet(), reader);
                 return Menu.indepAlgosMap.get(algoCode);
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
@@ -59,14 +60,14 @@ public abstract class DependentAlgorithm extends Algorithm {
             throws Exception;
 
     @Override
-    public long encrypt(File inputFile) {
-        updateAlgorithmMembers();
-        return super.encrypt(inputFile);
+    public long encrypt(File inputFile, Scanner reader) {
+        updateAlgorithmMembers(reader);
+        return super.encrypt(inputFile, reader);
     }
 
     @Override
-    public long decrypt(File inputFile) {
-        updateAlgorithmMembers();
-        return super.decrypt(inputFile);
+    public long decrypt(File inputFile, Scanner reader) {
+        updateAlgorithmMembers(reader);
+        return super.decrypt(inputFile, reader);
     }
 }

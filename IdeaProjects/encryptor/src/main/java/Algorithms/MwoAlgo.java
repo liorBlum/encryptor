@@ -1,6 +1,8 @@
 package Algorithms;
 
 
+import java.util.Scanner;
+
 /**
  * Algorithm class used to encrypt/decrypt input files
  * using Multiplication Algorithm.
@@ -11,9 +13,9 @@ public class MwoAlgo extends Algorithm {
      * @return decryption key
      */
     @Override
-    protected Key getInputKey() throws
+    protected Key getInputKey(Scanner reader) throws
             Exception {
-        byte encryptionKey = super.getInputKey().key;
+        byte encryptionKey = super.getInputKey(reader).key;
         // encryption key for MWO can't be even or 0
         if (encryptionKey == 0 || ((encryptionKey & 1) == 0)) {
             throw new IllegalArgumentException (

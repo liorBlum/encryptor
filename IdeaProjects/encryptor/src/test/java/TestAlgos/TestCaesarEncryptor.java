@@ -8,7 +8,7 @@ import java.io.*;
 /**
  * Test class specified to test encryption using Caesar Algorithm
  */
-public class TestCaesarEncryptor extends AbstractEncTest {
+public class TestCaesarEncryptor extends AbstractAlgoTest {
     public TestCaesarEncryptor() {
         super(new CaesarAlgo(), "Caesar Algorithm");
     }

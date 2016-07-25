@@ -2,30 +2,30 @@ package TestAlgos;
 
 import Algorithms.Algorithm;
 import java.io.*;
-import java.util.Arrays;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.ResourceBundle;
+import java.util.*;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Abstract class for encryption types tests.
+ * Abstract class for encryption algorithms tests.
  */
-public abstract class AbstractEncTest {
-    private File exampleFile = new File("example_file.txt");
+public abstract class AbstractAlgoTest {
+    protected File exampleFile = new File("example_file.txt");
     protected final InputStream defInStream = System.in;
-    private final ResourceBundle strings = ResourceBundle.getBundle("strings");
-    private Algorithm algorithm;
+    protected final ResourceBundle strings = ResourceBundle.getBundle("strings");
+    protected Algorithm algorithm;
     protected String algoName;
+    protected final String ls = System.getProperty("line.separator");
+    protected final ResourceBundle independentAlgosCodes =
+            ResourceBundle.getBundle("indep_algorithms");
 
     /**
      * A constructor for all encryption tests.
      * @param algorithm encryption algorithm to be tested
      * @param name algorithm's name
      */
-    protected AbstractEncTest(Algorithm algorithm, String name) {
+    protected AbstractAlgoTest(Algorithm algorithm, String name) {
         this.algoName = name;
         this.algorithm = algorithm;
         algorithm.addObserver(new Observer() {
@@ -80,23 +80,22 @@ public abstract class AbstractEncTest {
     protected void testAlgorithm() throws IOException {
         System.out.println("Testing " + algoName + "...");
         createExampleFile();
+        InputStream isIn = new ByteArrayInputStream(
+                strings.getString("keyFileName").getBytes());
+        System.setIn(isIn);
+        Scanner reader = new Scanner(System.in);
         // encrypt the example file
-        long elapsedTime = algorithm.encrypt(exampleFile);
+        long elapsedTime = algorithm.encrypt(exampleFile, reader);
         // test if encryption's time was measured correctly
         assertTrue(elapsedTime > 0);
         File encryptedFile = new File(exampleFile.getPath() + ".encrypted");
 
-        // send the key's path to System.in (for the decryptor)
-        InputStream isIn = new ByteArrayInputStream(
-                strings.getString("keyFileName").getBytes());
-        System.setIn(isIn);
-        elapsedTime = algorithm.decrypt(encryptedFile);
+        elapsedTime = algorithm.decrypt(encryptedFile, reader);
         System.setIn(defInStream);
         isIn.close();
         assertTrue(elapsedTime > 0);
         File decryptedFile = new File(exampleFile.getPath() + "_decrypted"
                 + ".encrypted");
-
         // test if encrypted file is different from original file
         assertTrue(encryptedFile.canRead());
         assertFalse(filesAreEqual(exampleFile, encryptedFile));
