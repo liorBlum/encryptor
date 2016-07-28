@@ -76,38 +76,110 @@ public abstract class Algorithm extends Observable {
             throws IOException;
 
     /**
-     * Encrypt an input file and write the result in a new file.
-     * @param inputFile an input file
+     * Encrypt/Decrypt a single normal file (not directory)
+     * @param file source file
+     * @param key key
+     * @param destinationFilePath filepath of the outcome
+     * @param actionCode "e" for encryption / "d" for decryption
+     * @throws IOException when I/O error occurs
+     * @throws IllegalArgumentException when unexpected error occurs
+     */
+    protected void execAlgoOnFile(File file, Key key, String destinationFilePath,
+                                  String actionCode) throws Exception {
+        // initialize a byte array to contain processed bytes
+        int fileLength = (int)file.length();
+        byte[] processedBytes = new byte[fileLength];
+        // read the file and process it byte-by-byte.
+        FileModifierUtils.readBytesFromFile(processedBytes, file);
+        if (actionCode.equals(strings.getString("encOption"))) {
+            for (int i = 0; i < fileLength; i++) {
+                processedBytes[i] = encryptByte(processedBytes[i], i, key);
+            }
+        } else if (actionCode.equals(strings.getString("decOption"))) {
+            for (int i = 0; i < fileLength; i++) {
+                processedBytes[i] = decryptByte(processedBytes[i], i, key);
+            }
+        } else {
+            throw new IllegalArgumentException();
+        }
+        // write the processed bytes to a new file
+        File processedFile =
+                FileModifierUtils.createFileInPath(destinationFilePath);
+        FileModifierUtils.writeBytesToFile(processedBytes, processedFile);
+    }
+
+    /**
+     * Encrypt/Decrypt a directory
+     * @param directory directory
+     * @param key key
+     * @param processedDirectory directory that will include
+     *                           processed files (encrypted/decrypted)
+     * @param actionCode "e" for encryption / "d" for decryption
+     * @throws Exception when invalid input is entered/ unexpected error
+     */
+    protected void execAlgoOnDirectory(File directory, Key key,
+                                       File processedDirectory,
+                                       String actionCode) throws Exception {
+        // source/outcome directories must both be directories
+        if (!directory.isDirectory() || !processedDirectory.isDirectory()) {
+            throw new IllegalArgumentException(
+                    strings.getString("unexpectedErrorMsg"));
+        }
+        File[] files = directory.listFiles();
+        if (files == null) {
+            throw new IllegalArgumentException(
+                    strings.getString("unexpectedErrorMsg"));
+        }
+        // process the directory file-by-file
+        for (File file : files) {
+            if (file.canRead() && file.isFile()) {
+                execAlgoOnFile(file, key,
+                        processedDirectory.getPath() + "/" + file.getName(),
+                        actionCode);
+            }
+        }
+    }
+    /**
+     * Encrypt an input file/directory
+     * and write the result in a new file/directory.
+     * @param inputFile an input file/directory
      * @return the exact time the encryption process began
      */
     public long encrypt(File inputFile, Scanner reader) {
-        // initialize a byte array to contain encrypted bytes
-        int fileLength = (int)inputFile.length();
-        byte[] encryptedBytes = new byte[fileLength];
         try {
-            // Generate a random encryption key and serialize it.
-             // (save it as "key.bin"
+            // Generate a random encryption key
             Key key = generateKey();
-            File keyFile = new File(inputFile.getParent(),
-                    strings.getString("keyFileName"));
-            SerializationUtils.serializeObject(keyFile, key);
+            File keyFile;
             System.out.println(strings.getString("keyMsg"));
             // notify observers that encryption started and measure time
             setChanged();
             notifyObservers(strings.getString("encStartMsg"));
             long startTime = System.nanoTime();
-            // read the file and encrypt it byte by byte.
-            FileModifierUtils.readBytesFromFile(encryptedBytes, inputFile);
-            for (int i = 0; i < fileLength; i++) {
-                encryptedBytes[i] = encryptByte(encryptedBytes[i], i, key);
+            // start encrypting file/directory
+            if (inputFile.isFile()) {
+                execAlgoOnFile(inputFile, key, inputFile.getPath()
+                        + ".encrypted", strings.getString("encOption"));
+                // the key is stored in the same directory
+                keyFile = new File(inputFile.getParent(),
+                        strings.getString("keyFileName"));
+            } else if (inputFile.isDirectory()) {
+                // create encrypted sub-directory and encrypt input directory
+                File encryptedDirectory = new File(inputFile, "encrypted");
+                encryptedDirectory.mkdir();
+                execAlgoOnDirectory(inputFile, key, encryptedDirectory,
+                        strings.getString("encOption"));
+                // the key is stored in 'encrypted' directory
+                keyFile = new File(inputFile,
+                        strings.getString("keyFileName"));
+            } else {
+                System.out.println(strings.getString("unexpectedErrorMsg"));
+                return 0;
             }
-             // write the encrypted bytes to a new file
-            File encryptedFile = FileModifierUtils.createFileInPath(
-                    inputFile.getPath() + ".encrypted");
-            FileModifierUtils.writeBytesToFile(encryptedBytes, encryptedFile);
-            // notify observers that encryption ended and return elapsed time
+            // serialize the kay
+            SerializationUtils.serializeObject(keyFile, key);
             setChanged();
             notifyObservers(strings.getString("encEndMsg"));
+            // return elapsed time after encryption ends
             return System.nanoTime() - startTime;
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -119,15 +191,13 @@ public abstract class Algorithm extends Observable {
     }
 
     /**
-     * Decrypt an input file and write the result in a new file.
-     * @param inputFile an input file.
+     * Decrypt an input file/directory
+     * and write the result in a new file/directory.
+     * @param inputFile an input file/directory.
      * @return the exact time the decryption process took
      */
     public long decrypt(File inputFile, Scanner reader) {
         Key key;
-        // initialize a byte array to contain decrypted bytes
-        int fileLength = (int) inputFile.length();
-        byte[] decryptedBytes = new byte[fileLength];
         // get a decryption key from the user
         while (true) {
             try {
@@ -138,31 +208,40 @@ public abstract class Algorithm extends Observable {
             }
         }
         try {
-            // notify observers that decryption started and measure time
-            setChanged();
-            notifyObservers(strings.getString("decStartMsg"));
-            long startTime = System.nanoTime();
-            // read the file and decrypt it byte by byte.
-            FileModifierUtils.readBytesFromFile(decryptedBytes, inputFile);
-            for (int i = 0; i < fileLength; i++) {
-                decryptedBytes[i] = decryptByte(decryptedBytes[i], i, key);
-            }
-            // write the decrypted bytes to a new file
+            // make the name of the decrypted file
             int fileExtIdx = inputFile.getPath().lastIndexOf('.');
             if (fileExtIdx == -1) {
                 fileExtIdx = inputFile.getPath().length();
             }
             String fileName = inputFile.getPath().substring(0, fileExtIdx);
             String fileExtension = inputFile.getPath().substring(fileExtIdx);
-            File decryptedFile = FileModifierUtils.createFileInPath(fileName
-                    + "_decrypted" + fileExtension);
-            FileModifierUtils.writeBytesToFile(decryptedBytes, decryptedFile);
-            // notify observers that decryption ended
+            // notify observers that decryption started and measure time
+            setChanged();
+            notifyObservers(strings.getString("decStartMsg"));
+            long startTime = System.nanoTime();
+            // start decrypting the file/directory
+            if (inputFile.isFile()) {
+                execAlgoOnFile(inputFile, key, fileName + "_decrypted"
+                        + fileExtension, strings.getString("decOption"));
+            } else if (inputFile.isDirectory()) {
+                // create decrypted sub-directory and decrypt input directory
+                File decryptedDirectory = new File(inputFile, "decrypted");
+                decryptedDirectory.mkdir();
+                execAlgoOnDirectory(inputFile, key, decryptedDirectory,
+                        strings.getString("decOption"));
+            } else {
+                System.out.println(strings.getString("unexpectedErrorMsg"));
+                return 0;
+            }
+            // notify observers that decryption ended and return elapsed time
             setChanged();
             notifyObservers(strings.getString("decEndMsg"));
             return System.nanoTime() - startTime;
         } catch (IOException e) {
             System.out.println(e.getMessage());
+            return 0;
+        } catch (Exception e) {
+            System.out.println(strings.getString("unexpectedErrorMsg"));
             return 0;
         }
     }

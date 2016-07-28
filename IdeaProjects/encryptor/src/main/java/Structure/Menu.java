@@ -9,11 +9,10 @@ import java.util.*;
  * Menu class with Singleton pattern
  */
 public class Menu {
-    Scanner reader = new Scanner(System.in);
     private static Menu instance = null;
-    private final String encOption = "e";
-    private final String decOption = "d";
-    private final String exOption = "x";
+    private String encOption;
+    private String decOption;
+    private String exOption;
     private final ResourceBundle strings =
             ResourceBundle.getBundle("strings");
     private final ResourceBundle independentAlgosCodes =
@@ -32,6 +31,9 @@ public class Menu {
      * and initializes algorithms map.
      */
     private Menu() {
+        encOption = strings.getString("encOption");
+        decOption = strings.getString("decOption");
+        exOption = strings.getString("exOption");
         indepAlgosMap.put(independentAlgosCodes.getString(
                 "Caesar Algorithm"), new CaesarAlgo());
         indepAlgosMap.put(independentAlgosCodes.getString(
@@ -127,8 +129,8 @@ public class Menu {
              */
             try {
                 System.out.println(strings.getString("menuText"));
-                chosenAction = UserInputUtils.getValidUserInput(
-                        Arrays.asList(encOption, decOption, exOption), reader);
+                chosenAction = UserInputUtils.getValidUserInput(Arrays.asList(
+                        encOption, decOption, exOption), reader);
                 if (chosenAction.equals(exOption)) {
                     return;
                 }

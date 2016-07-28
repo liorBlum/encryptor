@@ -40,6 +40,7 @@ public class UserInputUtils {
     /**
      * Get a file path from the user and return the file
      * which is denoted by that filepath.
+     * Can also receive a directory.
      * @param reader System.in scanner
      * @return file which is denoted by the given filepath
      * @throws IllegalArgumentException if input is invalid
@@ -50,7 +51,7 @@ public class UserInputUtils {
         File file;
         file = new File(filePathString);
         // return a valid file object (file size must be in int range)
-        if (file.canRead() && file.length() <= Integer.MAX_VALUE) {
+        if (file.canRead() && (file.isDirectory() || file.length() <= Integer.MAX_VALUE )) {
             return file;
         } else {
             throw new IllegalArgumentException(
