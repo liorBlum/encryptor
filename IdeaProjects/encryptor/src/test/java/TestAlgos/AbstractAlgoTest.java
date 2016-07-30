@@ -11,7 +11,9 @@ import static org.junit.Assert.assertTrue;
  * Abstract class for encryption algorithms tests.
  */
 public abstract class AbstractAlgoTest {
-    protected File exampleFile = new File("example_file.txt");
+    protected File exampleFolder = new File("exampleFolder");
+    protected File exampleFile1 = new File(exampleFolder, "example_file1.txt");
+    protected File exampleFile2 = new File(exampleFolder, "example_file2.txt");
     protected final InputStream defInStream = System.in;
     protected final ResourceBundle strings = ResourceBundle.getBundle("strings");
     protected Algorithm algorithm;
@@ -36,16 +38,20 @@ public abstract class AbstractAlgoTest {
     }
 
     /**
-     * create the example file that will be encrypted
+     * create the example directory that will be encrypted
      * (if is not already created)
      * @throws IOException
      */
-    protected void createExampleFile() throws IOException{
-        String exampleStr = "Text Example 12345";
-        if (exampleFile.createNewFile()) {
-            FileWriter fw = new FileWriter(exampleFile);
-            fw.write(exampleStr);
-            fw.close();
+    protected void createExampleFiles() throws IOException{
+        String exampleStr1 = "Text Example 12345";
+        String exampleStr2 = "abcdefgh *&^%$##?>";
+        if (exampleFolder.mkdir()) {
+            FileWriter fw1 = new FileWriter(exampleFile1);
+            FileWriter fw2 = new FileWriter(exampleFile2);
+            fw1.write(exampleStr1);
+            fw2.write(exampleStr2);
+            fw1.close();
+            fw2.close();
         }
     }
     /**
@@ -55,6 +61,9 @@ public abstract class AbstractAlgoTest {
      * @return true if equal. Otherwise, false.
      */
     protected boolean filesAreEqual(File f1, File f2) throws IOException {
+        if (!f1.isFile() || !f2.isFile()) {
+            throw new IOException(strings.getString("inputErrorMsg"));
+        }
         int filesLength = (int) f1.length();
         // first of all, check the files' lengths
         if (f2.length() != filesLength) {
@@ -73,38 +82,57 @@ public abstract class AbstractAlgoTest {
     }
 
     /**
+     * Get the bytes to send as input to the algorithm.
+     * Input may include algorithm codes and key file path.
+     * @return input bytes
+     */
+    protected byte[] getInputToSend() {
+        return (exampleFolder.getPath() + "/"
+                + strings.getString("keyFileName")).getBytes();
+    }
+
+    /**
      * test encryption and decryption of an example file with
      * any encryption algorithm
      * @throws IOException
      */
     protected void testAlgorithm() throws IOException {
         System.out.println("Testing " + algoName + "...");
-        createExampleFile();
-        InputStream isIn = new ByteArrayInputStream(
-                strings.getString("keyFileName").getBytes());
+        createExampleFiles();
+        InputStream isIn = new ByteArrayInputStream(getInputToSend());
         System.setIn(isIn);
         Scanner reader = new Scanner(System.in);
-        // encrypt the example file
-        long elapsedTime = algorithm.encrypt(exampleFile, reader);
+        // encrypt the example files
+        long elapsedTime = algorithm.encrypt(exampleFolder, reader);
         // test if encryption's time was measured correctly
         assertTrue(elapsedTime > 0);
-        File encryptedFile = new File(exampleFile.getPath() + ".encrypted");
-
-        elapsedTime = algorithm.decrypt(encryptedFile, reader);
+        File encryptedFolder = new File(exampleFolder, "encrypted");
+        File encryptedFile1 = new File(encryptedFolder, exampleFile1.getName());
+        File encryptedFile2 = new File(encryptedFolder, exampleFile2.getName());
+        // decrypt the encrypted file (with same algorithm and encryption key)
+        elapsedTime = algorithm.decrypt(encryptedFolder, reader);
         System.setIn(defInStream);
         isIn.close();
+        // delete unnecessary key
+        new File(exampleFolder.getPath() + "/"
+                + strings.getString("keyFileName")).delete();
         assertTrue(elapsedTime > 0);
-        File decryptedFile = new File(exampleFile.getPath() + "_decrypted"
-                + ".encrypted");
-        // test if encrypted file is different from original file
-        assertTrue(encryptedFile.canRead());
-        assertFalse(filesAreEqual(exampleFile, encryptedFile));
-        // test if decrypted file is equal to the original file
-        assertTrue(decryptedFile.canRead());
-        assertTrue(filesAreEqual(exampleFile, decryptedFile));
+        File decryptedFolder = new File(encryptedFolder, "decrypted");
+        File decryptedFile1 = new File(decryptedFolder, exampleFile1.getName());
+        File decryptedFile2 = new File(decryptedFolder, exampleFile2.getName());
+        // test if encrypted files are different from original files
+        assertFalse(filesAreEqual(exampleFile1, encryptedFile1));
+        assertFalse(filesAreEqual(exampleFile2, encryptedFile2));
+        // test if decrypted files are equal to the original files
+        assertTrue(filesAreEqual(exampleFile1, decryptedFile1));
+        assertTrue(filesAreEqual(exampleFile2, decryptedFile2));
         // delete the encrypted and decrypted files
-        encryptedFile.delete();
-        decryptedFile.delete();
+        encryptedFile1.delete();
+        encryptedFile2.delete();
+        decryptedFile1.delete();
+        decryptedFile2.delete();
+        decryptedFolder.delete();
+        encryptedFolder.delete();
         System.out.println(algoName + " test completed successfully.\n");
     }
 }

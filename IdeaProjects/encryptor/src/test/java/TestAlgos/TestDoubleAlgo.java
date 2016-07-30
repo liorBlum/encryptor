@@ -10,7 +10,7 @@ import java.io.InputStream;
 /**
  * Test class specified to test encryption using Double Algorithm
  */
-public class TestDoubleAlgo extends AbstractDepAlgoTest {
+public class TestDoubleAlgo extends AbstractAlgoTest {
     public TestDoubleAlgo() {
         super(new DoubleAlgo(), "Double Algorithm");
     }
@@ -20,7 +20,8 @@ public class TestDoubleAlgo extends AbstractDepAlgoTest {
         String twoAlgosDef = independentAlgosCodes.getString("Caesar Algorithm")
                 + ls
                 + independentAlgosCodes.getString("XOR Algorithm");
-        String keyPath = strings.getString("keyFileName");
+        String keyPath = exampleFolder.getPath() + "/"
+                + strings.getString("keyFileName");
         return (twoAlgosDef + ls + twoAlgosDef + ls + keyPath).getBytes();
     }
 

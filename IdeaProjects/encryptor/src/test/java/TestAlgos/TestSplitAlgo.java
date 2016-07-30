@@ -6,9 +6,9 @@ import org.junit.Test;
 import java.io.IOException;
 
 /**
- * Created by Lior on 26/07/2016.
+ *Test class specified to test encryption using Split Algorithm
  */
-public class TestSplitAlgo extends AbstractDepAlgoTest {
+public class TestSplitAlgo extends AbstractAlgoTest {
     public TestSplitAlgo() {
         super(new SplitAlgo(), "Split Algorithm");
     }
@@ -16,7 +16,8 @@ public class TestSplitAlgo extends AbstractDepAlgoTest {
     protected byte[] getInputToSend() {
         String algoDef = independentAlgosCodes.getString(
                 "Multiplication Algorithm");
-        String keyPath = strings.getString("keyFileName");
+        String keyPath = exampleFolder.getPath() + "/"
+                + strings.getString("keyFileName");
         return (algoDef + ls + algoDef + ls + keyPath).getBytes();
     }
 

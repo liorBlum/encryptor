@@ -22,7 +22,7 @@ public final class FileModifierUtils {
      * @return new file
      * @throws IOException if file exists or other IO error occurred
      */
-    public static File createFileInPath(String path) throws IOException {
+    public static File createNewFileInPath(String path) throws IOException {
         File newFile = new File(path);
         if (newFile.createNewFile()) {
             return newFile;

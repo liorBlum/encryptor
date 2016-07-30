@@ -6,15 +6,18 @@ import Utilities.UserInputUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Observable;
-import java.util.Random;
-import java.util.ResourceBundle;
-import java.util.Scanner;
+import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Abstract class for encryptors
  */
 public abstract class Algorithm extends Observable {
+    private String syncOpt = "s";
+    private String asyncOpt = "a";
     protected final static ResourceBundle strings =
             ResourceBundle.getBundle("strings");
     protected Random randomizer = new Random();
@@ -104,7 +107,7 @@ public abstract class Algorithm extends Observable {
         }
         // write the processed bytes to a new file
         File processedFile =
-                FileModifierUtils.createFileInPath(destinationFilePath);
+                FileModifierUtils.createNewFileInPath(destinationFilePath);
         FileModifierUtils.writeBytesToFile(processedBytes, processedFile);
     }
 
@@ -115,11 +118,40 @@ public abstract class Algorithm extends Observable {
      * @param processedDirectory directory that will include
      *                           processed files (encrypted/decrypted)
      * @param actionCode "e" for encryption / "d" for decryption
+     * @param syncCode "s" for sync / "a" for async
      * @throws Exception when invalid input is entered/ unexpected error
      */
-    protected void execAlgoOnDirectory(File directory, Key key,
-                                       File processedDirectory,
-                                       String actionCode) throws Exception {
+    protected void execAlgoOnDirectory(File directory, final Key key,
+                                       final File processedDirectory,
+                                       final String actionCode,
+                                       String syncCode) throws Exception {
+        /**
+         * A runnable local class that executes the algorithm on a given file
+         */
+        class ExecAlgoOnFileJob implements Runnable {
+            File file;
+            // construct class with a given file
+            private ExecAlgoOnFileJob(File file) {
+                this.file = file;
+            }
+            // run the algorithm on the file with outer class' parameters
+            public void run() {
+                //DEBUG
+                System.out.println(Thread.currentThread().getName()
+                        + " Start. File = " + file.getName());
+                try {
+                    execAlgoOnFile(file, key,
+                            processedDirectory.getPath() + "/" + file.getName(),
+                            actionCode);
+                    //DEBUG
+                    System.out.println(Thread.currentThread().getName()
+                            + " End. File = " + file.getName());
+                } catch (Exception e) {
+                    System.out.println(strings.getString("singleFileError")
+                            + file.getName() + " : " + e.getMessage());
+                }
+            }
+        }
         // source/outcome directories must both be directories
         if (!directory.isDirectory() || !processedDirectory.isDirectory()) {
             throw new IllegalArgumentException(
@@ -130,13 +162,30 @@ public abstract class Algorithm extends Observable {
             throw new IllegalArgumentException(
                     strings.getString("unexpectedErrorMsg"));
         }
-        // process the directory file-by-file
-        for (File file : files) {
-            if (file.canRead() && file.isFile()) {
-                execAlgoOnFile(file, key,
-                        processedDirectory.getPath() + "/" + file.getName(),
-                        actionCode);
+        if (syncCode.equals(syncOpt)) {
+            // process the directory file-by-file synchronously
+            for (File file : files) {
+                if (file.canRead() && file.isFile()) {
+                    (new ExecAlgoOnFileJob(file)).run();
+                }
             }
+        // process the directory using threads
+        } else if(syncCode.equals(asyncOpt)) {
+            // executor uses 1 element queue so that files never wait
+            ThreadPoolExecutor executor = new ThreadPoolExecutor(
+                    0, Integer.MAX_VALUE,
+                    100, TimeUnit.MILLISECONDS,
+                    new ArrayBlockingQueue<Runnable>(1));
+            for (final File file : files) {
+                if (file.canRead() && file.isFile()) {
+                    executor.execute(new ExecAlgoOnFileJob(file));
+                }
+            }
+            executor.shutdown();
+            executor.awaitTermination(120, TimeUnit.SECONDS);
+        } else {
+            throw new IllegalArgumentException(
+                    strings.getString("unexpectedErrorMsg"));
         }
     }
     /**
@@ -151,23 +200,32 @@ public abstract class Algorithm extends Observable {
             Key key = generateKey();
             File keyFile;
             System.out.println(strings.getString("keyMsg"));
-            // notify observers that encryption started and measure time
-            setChanged();
-            notifyObservers(strings.getString("encStartMsg"));
-            long startTime = System.nanoTime();
+            long startTime;
             // start encrypting file/directory
             if (inputFile.isFile()) {
+                // notify observers that encryption started and measure time
+                setChanged();
+                notifyObservers(strings.getString("encStartMsg"));
+                startTime = System.nanoTime();
                 execAlgoOnFile(inputFile, key, inputFile.getPath()
                         + ".encrypted", strings.getString("encOption"));
                 // the key is stored in the same directory
                 keyFile = new File(inputFile.getParent(),
                         strings.getString("keyFileName"));
             } else if (inputFile.isDirectory()) {
+                // get sync/async from the user
+                System.out.println(strings.getString("syncText"));
+                String syncCode = UserInputUtils.getValidUserInput(
+                        Arrays.asList(syncOpt, asyncOpt), reader);
+                // notify observers that encryption started and measure time
+                setChanged();
+                notifyObservers(strings.getString("encStartMsg"));
+                startTime = System.nanoTime();
                 // create encrypted sub-directory and encrypt input directory
                 File encryptedDirectory = new File(inputFile, "encrypted");
                 encryptedDirectory.mkdir();
                 execAlgoOnDirectory(inputFile, key, encryptedDirectory,
-                        strings.getString("encOption"));
+                        strings.getString("encOption"), syncCode);
                 // the key is stored in 'encrypted' directory
                 keyFile = new File(inputFile,
                         strings.getString("keyFileName"));
@@ -215,20 +273,29 @@ public abstract class Algorithm extends Observable {
             }
             String fileName = inputFile.getPath().substring(0, fileExtIdx);
             String fileExtension = inputFile.getPath().substring(fileExtIdx);
-            // notify observers that decryption started and measure time
-            setChanged();
-            notifyObservers(strings.getString("decStartMsg"));
-            long startTime = System.nanoTime();
+            long startTime;
             // start decrypting the file/directory
             if (inputFile.isFile()) {
+                // notify observers that decryption started and measure time
+                setChanged();
+                notifyObservers(strings.getString("decStartMsg"));
+                startTime = System.nanoTime();
                 execAlgoOnFile(inputFile, key, fileName + "_decrypted"
                         + fileExtension, strings.getString("decOption"));
             } else if (inputFile.isDirectory()) {
+                // get sync/async from the user
+                System.out.println(strings.getString("syncText"));
+                String syncCode = UserInputUtils.getValidUserInput(
+                        Arrays.asList(syncOpt, asyncOpt), reader);
+                // notify observers that decryption started and measure time
+                setChanged();
+                notifyObservers(strings.getString("decStartMsg"));
+                startTime = System.nanoTime();
                 // create decrypted sub-directory and decrypt input directory
                 File decryptedDirectory = new File(inputFile, "decrypted");
                 decryptedDirectory.mkdir();
                 execAlgoOnDirectory(inputFile, key, decryptedDirectory,
-                        strings.getString("decOption"));
+                        strings.getString("decOption"), syncCode);
             } else {
                 System.out.println(strings.getString("unexpectedErrorMsg"));
                 return 0;
