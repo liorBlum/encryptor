@@ -1,0 +1,76 @@
+
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:complexType name="algorithm" abstract="true">
+        <xs:sequence/>
+    </xs:complexType>
+
+    <xs:element name="doubleAlgo" type="doubleAlgo"/>
+
+    <xs:complexType name="doubleAlgo">
+        <xs:complexContent>
+            <xs:extension base="algorithm">
+                <xs:sequence>
+                    <xs:element name="algorithm1" type="algorithm" minOccurs="0"/>
+                    <xs:element name="algorithm2" type="algorithm" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="reverseAlgo" type="reverseAlgo"/>
+
+    <xs:complexType name="reverseAlgo">
+        <xs:complexContent>
+            <xs:extension base="algorithm">
+                <xs:sequence>
+                    <xs:element name="algorithm" type="algorithm" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="splitAlgo" type="splitAlgo"/>
+
+    <xs:complexType name="splitAlgo">
+        <xs:complexContent>
+            <xs:extension base="algorithm">
+                <xs:sequence>
+                    <xs:element name="algorithm" type="algorithm" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="caesarAlgo" type="caesarAlgo"/>
+
+    <xs:complexType name="caesarAlgo">
+        <xs:complexContent>
+            <xs:extension base="algorithm">
+                <xs:sequence/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="xorAlgo" type="xorAlgo"/>
+
+    <xs:complexType name="xorAlgo">
+        <xs:complexContent>
+            <xs:extension base="algorithm">
+                <xs:sequence/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="mwoAlgo" type="mwoAlgo"/>
+
+    <xs:complexType name="mwoAlgo">
+        <xs:complexContent>
+            <xs:extension base="algorithm">
+                <xs:sequence/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+
+</xs:schema>

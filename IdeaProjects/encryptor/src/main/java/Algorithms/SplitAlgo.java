@@ -1,11 +1,14 @@
 package Algorithms;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.IOException;
 import java.util.Scanner;
 
 /**
- * Created by Lior on 25/07/2016.
+ * Algorithm class used to encrypt/decrypt input files
+ * using Split Algorithm.
  */
+@XmlRootElement(name="splitAlgo")
 public class SplitAlgo extends DependentAlgorithm {
     private Algorithm algorithm;
 
@@ -65,5 +68,13 @@ public class SplitAlgo extends DependentAlgorithm {
         } else {
             return algorithm.decryptByte(b, idx, new Key(secondKey));
         }
+    }
+
+    public Algorithm getAlgorithm() {
+        return algorithm;
+    }
+
+    public void setAlgorithm(Algorithm algorithm) {
+        this.algorithm = algorithm;
     }
 }

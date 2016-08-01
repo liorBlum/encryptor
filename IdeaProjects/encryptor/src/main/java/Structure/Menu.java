@@ -1,7 +1,10 @@
 package Structure;
 
 import Algorithms.*;
+import Utilities.JAXBUtils;
 import Utilities.UserInputUtils;
+
+
 import java.io.File;
 import java.util.*;
 
@@ -122,6 +125,12 @@ public class Menu {
         String chosenAction;
         File inputFile;
         String algoCode;
+        DoubleAlgo doubleAlgo = new DoubleAlgo();
+        doubleAlgo.setAlgorithm1(new CaesarAlgo());
+        doubleAlgo.setAlgorithm2(new XORAlgo());
+        //JAXBUtils.marshalAlgorithm(doubleAlgo, new File("double.xml"));
+        //Algorithm algorithm = JAXBUtils.unmarshalAlgorithm(new File("double.xml"));
+        //algorithm.encrypt(new File("C:/Users/Lior/Desktop/sdfg.txt"), reader);
         while (true) {
             /*
             end the loop only when valid input is entered
@@ -148,4 +157,5 @@ public class Menu {
         //if the user entered 'e', execute Encryption. Otherwise, decryption
         executeAlgorithm(chosenAction, inputFile, algoCode, reader);
     }
+
 }

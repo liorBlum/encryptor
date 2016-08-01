@@ -1,9 +1,12 @@
 package Algorithms;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * Algorithm class used to encrypt/decrypt input files
  * using XOR Algorithm.
  */
+@XmlRootElement(name="xorAlgo")
 public class XORAlgo extends Algorithm {
     @Override
     protected byte encryptByte(byte b, int idx, Key keyObject) {

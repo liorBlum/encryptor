@@ -4,17 +4,21 @@ import Utilities.FileModifierUtils;
 import Utilities.SerializationUtils;
 import Utilities.UserInputUtils;
 
+import javax.xml.bind.annotation.XmlSeeAlso;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Abstract class for encryptors
+ * Abstract class for algorithms
+ *
+ * ALL ALGORITHMS MUST BE IN "XmlSeeAlso" ANNOTATION
  */
+@XmlSeeAlso({CaesarAlgo.class, DoubleAlgo.class, XORAlgo.class, MwoAlgo.class,
+            ReverseAlgo.class,SplitAlgo.class})
 public abstract class Algorithm extends Observable {
     private String syncOpt = "s";
     private String asyncOpt = "a";
@@ -39,7 +43,7 @@ public abstract class Algorithm extends Observable {
      * Generate a random encryption key between -128 and 127
      * @return encryption key
      */
-    protected Key generateKey() {
+     protected Key generateKey() {
         // randomize a key between -128 and 127 (1 byte) and return it
         byte key = (byte)(randomizer.nextInt(2*Byte.MAX_VALUE + 2)
                 + Byte.MIN_VALUE);
@@ -199,7 +203,6 @@ public abstract class Algorithm extends Observable {
             // Generate a random encryption key
             Key key = generateKey();
             File keyFile;
-            System.out.println(strings.getString("keyMsg"));
             long startTime;
             // start encrypting file/directory
             if (inputFile.isFile()) {
@@ -237,6 +240,7 @@ public abstract class Algorithm extends Observable {
             SerializationUtils.serializeObject(keyFile, key);
             setChanged();
             notifyObservers(strings.getString("encEndMsg"));
+            System.out.println(strings.getString("keyMsg"));
             // return elapsed time after encryption ends
             return System.nanoTime() - startTime;
         } catch (IOException e) {

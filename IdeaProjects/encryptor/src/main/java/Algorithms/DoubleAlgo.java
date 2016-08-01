@@ -1,24 +1,46 @@
 package Algorithms;
 
+
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.IOException;
 import java.util.Scanner;
 
+
 /**
  * Algorithm class used to encrypt/decrypt input files
- * using Caesar Algorithm.
+ * using Double Algorithm.
  */
+@XmlRootElement(name="doubleAlgo")
 public class DoubleAlgo extends DependentAlgorithm {
-    private Algorithm algorithm1;
-    private Algorithm algorithm2;
+    private Algorithm algorithm1 = null;
+    private Algorithm algorithm2 = null;
+
+    public Algorithm getAlgorithm1() {
+        return algorithm1;
+    }
+
+    public Algorithm getAlgorithm2() {
+        return algorithm2;
+    }
+
+    public void setAlgorithm1(Algorithm algorithm1) {
+        this.algorithm1 = algorithm1;
+    }
+
+    public void setAlgorithm2(Algorithm algorithm2) {
+        this.algorithm2 = algorithm2;
+    }
 
     @Override
     protected void updateAlgorithmMembers(Scanner reader) {
-        System.out.println(strings.getString("doubleAlgoMsg"));
-        showIndepAlgorithmsSelection();
-        System.out.println('\n' + strings.getString("firstAlgoMsg"));
-        algorithm1 = getIndepAlgorithmFromUser(reader);
-        System.out.println(strings.getString("secondAlgoMsg"));
-        algorithm2 = getIndepAlgorithmFromUser(reader);
+        if ((algorithm1 == null) || (algorithm2 == null)) {
+            System.out.println(strings.getString("doubleAlgoMsg"));
+            showIndepAlgorithmsSelection();
+            System.out.println('\n' + strings.getString("firstAlgoMsg"));
+            algorithm1 = getIndepAlgorithmFromUser(reader);
+            System.out.println(strings.getString("secondAlgoMsg"));
+            algorithm2 = getIndepAlgorithmFromUser(reader);
+        }
     }
 
     @Override

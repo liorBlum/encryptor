@@ -1,9 +1,12 @@
 package Algorithms;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * Algorithm class used to encrypt/decrypt input files
  * using Caesar Algorithm.
  */
+@XmlRootElement(name="caeserAlgo")
 public class CaesarAlgo extends Algorithm {
 
     @Override

@@ -1,11 +1,14 @@
 package Algorithms;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.IOException;
 import java.util.Scanner;
 
 /**
- * Created by Lior on 25/07/2016.
+ * Algorithm class used to encrypt/decrypt input files
+ * using Reverse Algorithm.
  */
+@XmlRootElement(name="reverseAlgo")
 public class ReverseAlgo extends DependentAlgorithm {
     private Algorithm algorithm;
 
@@ -34,5 +37,13 @@ public class ReverseAlgo extends DependentAlgorithm {
     @Override
     protected byte decryptByte(byte b, int idx, Key key) throws IOException {
         return algorithm.encryptByte(b, idx, key);
+    }
+
+    public Algorithm getAlgorithm() {
+        return algorithm;
+    }
+
+    public void setAlgorithm(Algorithm algorithm) {
+        this.algorithm = algorithm;
     }
 }

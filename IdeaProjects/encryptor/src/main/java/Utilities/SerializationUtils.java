@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.ResourceBundle;
 
 /**
- * A utilities class of file modifying methods
+ * A utilities class of serialization methods
  */
 public final class SerializationUtils {
     private final static ResourceBundle strings =

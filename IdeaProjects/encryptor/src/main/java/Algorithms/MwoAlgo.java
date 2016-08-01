@@ -1,12 +1,13 @@
 package Algorithms;
 
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Scanner;
-
 /**
  * Algorithm class used to encrypt/decrypt input files
  * using Multiplication Algorithm.
  */
+@XmlRootElement(name="mwoAlgo")
 public class MwoAlgo extends Algorithm {
     /**
      * Get encryption key from the user and find decryption key for MWO
