@@ -1,5 +1,7 @@
 package Algorithms;
 
+import lombok.Getter;
+import lombok.Setter;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.IOException;
 import java.util.Scanner;
@@ -10,10 +12,21 @@ import java.util.Scanner;
  */
 @XmlRootElement(name="splitAlgo")
 public class SplitAlgo extends DependentAlgorithm {
-    private Algorithm algorithm;
+    /**
+     * Get and set inner algorithm used by Reverse Algorithm
+     * @param algorithm algorithm
+     * @return algorithm
+     */
+    @Getter @Setter private Algorithm algorithm;
 
+    /**
+     * Algorithm constructor that is used to set the Algorithm's name
+     */
+    public SplitAlgo() {
+        super("Split Algorithm");
+    }
     @Override
-    protected void updateAlgorithmMembers(Scanner reader) {
+    protected void updateAlgorithmMembers(Scanner reader) throws IOException {
         System.out.println(strings.getString("splitMsg"));
         showIndepAlgorithmsSelection();
         algorithm = getIndepAlgorithmFromUser(reader);
@@ -68,13 +81,5 @@ public class SplitAlgo extends DependentAlgorithm {
         } else {
             return algorithm.decryptByte(b, idx, new Key(secondKey));
         }
-    }
-
-    public Algorithm getAlgorithm() {
-        return algorithm;
-    }
-
-    public void setAlgorithm(Algorithm algorithm) {
-        this.algorithm = algorithm;
     }
 }

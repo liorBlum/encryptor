@@ -1,13 +1,17 @@
 package Algorithms;
 
 
+import lombok.NonNull;
+
 import java.io.Serializable;
 
 /**
  * Serializable class that holds a key/keys
  */
 public class Key implements Serializable {
+    @NonNull
     public final Byte key;
+
     public final Byte secondKey;
     /**
      * Construct a Key object with only one valid key

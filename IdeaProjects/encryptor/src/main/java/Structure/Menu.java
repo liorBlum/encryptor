@@ -3,8 +3,8 @@ package Structure;
 import Algorithms.*;
 import Utilities.JAXBUtils;
 import Utilities.UserInputUtils;
-
-
+import org.xml.sax.SAXException;
+import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.util.*;
 
@@ -13,97 +13,17 @@ import java.util.*;
  */
 public class Menu {
     private static Menu instance = null;
-    private String encOption;
-    private String decOption;
-    private String exOption;
     private final ResourceBundle strings =
             ResourceBundle.getBundle("strings");
-    private final ResourceBundle independentAlgosCodes =
-            ResourceBundle.getBundle("indep_algorithms");
-    private final ResourceBundle dependentAlgosCodes =
-            ResourceBundle.getBundle("dep_algorithms");
-    public static HashMap<String,Algorithm> indepAlgosMap
-            = new HashMap<String, Algorithm>();
-    public static HashMap<String,Algorithm> depAlgosMap
-            = new HashMap<String, Algorithm>();
-    public static HashMap<String,Algorithm> allAlgosMap
-            = new HashMap<String, Algorithm>();
+    private final ResourceBundle algoClasses =
+            ResourceBundle.getBundle("algorithms_classes");
+    private final ResourceBundle algoNames =
+            ResourceBundle.getBundle("algorithms_names");
 
     /**
      * Private constructor which avoids instantiation
-     * and initializes algorithms map.
      */
-    private Menu() {
-        encOption = strings.getString("encOption");
-        decOption = strings.getString("decOption");
-        exOption = strings.getString("exOption");
-        indepAlgosMap.put(independentAlgosCodes.getString(
-                "Caesar Algorithm"), new CaesarAlgo());
-        indepAlgosMap.put(independentAlgosCodes.getString(
-                "XOR Algorithm"), new XORAlgo());
-        indepAlgosMap.put(independentAlgosCodes.getString(
-                "Multiplication Algorithm"), new MwoAlgo());
-        depAlgosMap.put(dependentAlgosCodes.getString(
-                "Double Algorithm"), new DoubleAlgo());
-        depAlgosMap.put(dependentAlgosCodes.getString(
-                "Reverse Algorithm"), new ReverseAlgo());
-        depAlgosMap.put(dependentAlgosCodes.getString(
-                "Split Algorithm"), new SplitAlgo());
-        allAlgosMap.putAll(indepAlgosMap);
-        allAlgosMap.putAll(depAlgosMap);
-    }
-
-    /**
-     * Execute encryption/decryption on a given file and print elapsed time.
-     * Expects valid parameters.
-     * @param actionCode action char('e'/'d')
-     * @param file given file
-     * @param algoCode String code of the requested encryption algorithm
-     */
-    private void executeAlgorithm(String actionCode, File file,
-                                        String algoCode, Scanner reader) {
-        Algorithm algorithm = allAlgosMap.get(algoCode);
-        // add an observer in order to notify
-        // the user when action started\ended
-        algorithm.addObserver(new Observer() {
-            public void update(Observable o, Object arg) {
-                System.out.println(arg);
-            }
-        });
-        long elapsedTime;
-        if (actionCode.equals(encOption)) {
-            // execute action and measure the time it took
-            elapsedTime = algorithm.encrypt(file, reader);
-        } else {
-            elapsedTime = algorithm.decrypt(file, reader);
-        }
-        if (elapsedTime == 0) {
-            System.out.println(strings.getString("generalErrorMsg"));
-        } else {
-            System.out.println(strings.getString("elapsedTimeTxt") + " "
-                    + (float) elapsedTime / 1000000 + " milliseconds");
-        }
-    }
-
-    /**
-     * Display all algorithms found in properties
-     */
-    private void showAlgorithmsSelection() {
-        System.out.println(strings.getString("algoMsg"));
-        Enumeration<String> indepAlgorithms = independentAlgosCodes.getKeys();
-        Enumeration<String> depAlgorithms = dependentAlgosCodes.getKeys();
-        // go over all algorithms and print them as choices
-        while (indepAlgorithms.hasMoreElements()) {
-            String algo = indepAlgorithms.nextElement();
-            System.out.println("For " + algo + " Enter: "
-                    + independentAlgosCodes.getString(algo));
-        }
-        while (depAlgorithms.hasMoreElements()) {
-            String algo = depAlgorithms.nextElement();
-            System.out.println("For " + algo + " Enter: "
-                    + dependentAlgosCodes.getString(algo));
-        }
-    }
+    private Menu() {}
 
     /**
      * Get the single Menu object
@@ -117,6 +37,135 @@ public class Menu {
     }
 
     /**
+     * Execute encryption/decryption on a given file and print elapsed time
+     * using a given algorithm.
+     * @param actionCode action char('e'/'d')
+     * @param file given file
+     * @param algorithm Desired encryption algorithm
+     * @param reader user input reader
+     */
+    private void executeAlgorithm(Algorithm algorithm, String actionCode,
+                                  File file, Scanner reader) {
+        // add an observer in order to notify
+        // the user when action started\ended
+        algorithm.addObserver(new Observer() {
+            public void update(Observable o, Object arg) {
+                System.out.println(arg);
+            }
+        });
+        System.out.println("Executing " + algorithm.getName() + "...");
+        long elapsedTime = 0;
+        if (actionCode.equals(strings.getString("encOption"))) {
+            // execute action and measure the time it took
+            elapsedTime = algorithm.encrypt(file, reader);
+        } else if (actionCode.equals(strings.getString("decOption"))) {
+            elapsedTime = algorithm.decrypt(file, reader);
+        }
+        if (elapsedTime == 0) {
+            System.out.println(strings.getString("generalErrorMsg"));
+        } else {
+            System.out.println(strings.getString("elapsedTimeTxt") + " "
+                    + (float) elapsedTime / 1000000 + " milliseconds\n");
+        }
+    }
+
+    /**
+     * Display all algorithms found in properties
+     */
+    private void showAlgorithmsSelection() {
+        System.out.println(strings.getString("algoMsg"));
+        Enumeration<String> algorithmCodes = algoNames.getKeys();
+        // go over all algorithms and print them as choices
+        while (algorithmCodes.hasMoreElements()) {
+            String algoCode = algorithmCodes.nextElement();
+            System.out.println("For " + algoNames.getString(algoCode)
+                    + " Enter: " + algoCode);
+        }
+    }
+
+    /**
+     * Let the user choose algorithm in 3 possible methods:
+     * using default algorithm (loaded from default.xml),
+     * using an imported algorithm
+     * @param reader user input reader
+     * @return desired algorithm
+     */
+    private Algorithm chooseAlgorithm(Scanner reader) {
+        File defXmlFile = new File(strings.getString("defAlgoDefFile"));
+        String chosenOption;
+        System.out.println(strings.getString("algoChooseMsg"));
+        while (true) {
+            try {
+                // present the 3 options to the user
+                System.out.println(strings.getString("menuAlgoTxt"));
+                chosenOption = UserInputUtils.getValidUserInput(Arrays.asList(
+                        strings.getString("defOpt"),
+                        strings.getString("importOpt"),
+                        strings.getString("manuOpt")), reader
+                );
+                if (chosenOption.equals(strings.getString("defOpt"))) {
+                    // use default algorithm
+                    return JAXBUtils.unmarshalAlgorithm(defXmlFile);
+                } else if (chosenOption.equals(strings.getString("importOpt"))) {
+                    // use imported algorithm
+                    System.out.println(strings.getString("CfgFilePathMsg"));
+                    File algoCfgFile = UserInputUtils.getInputFile(reader);
+                    return JAXBUtils.unmarshalAlgorithm(algoCfgFile);
+                } else {
+                    // choose algorithm manually
+                    showAlgorithmsSelection();
+                    String algoCode = UserInputUtils.getValidUserInput(
+                            Collections.list(algoClasses.getKeys()), reader);
+                    // get the algorithm object from the given algoCode
+                    String algoClassName = strings.getString("algoPack")
+                            + algoClasses.getString(algoCode);
+                    return (Algorithm)(Class.forName(algoClassName).newInstance());
+                }
+            }  catch (JAXBException e) {
+                System.out.println(strings.getString("algoDefError"));
+            }  catch (ClassNotFoundException e) {
+                System.out.println(strings.getString("algoNotFound"));
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Export (marshal) the algorithm into an XML configuration file if
+     * the user wants to.
+     * @param algorithm given algorithm object
+     * @param reader user input reader
+     */
+    private void exportAlgorithm(Algorithm algorithm, Scanner reader) {
+        String chosenOption;
+        while (true) {
+            try {
+                System.out.println(strings.getString("exportCfgMsg"));
+                chosenOption = UserInputUtils.getValidUserInput(Arrays.asList(
+                        strings.getString("yesOpt"),
+                        strings.getString("noOpt")), reader);
+                if (chosenOption.equals(strings.getString("yesOpt"))) {
+                    // marshal the algorithm into the given file path
+                    System.out.println(strings.getString("CfgFilePathMsg"));
+                    File algoCfgFile = new File(reader.nextLine());
+                    JAXBUtils.marshalAlgorithm(algorithm, algoCfgFile);
+                    System.out.println(strings.getString("exportSuccessMsg"));
+                    break;
+                } else if (chosenOption.equals(strings.getString("noOpt"))) {
+                    break;
+                }
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
+            } catch (JAXBException e) {
+                System.out.println(strings.getString("algoDefError"));
+            } catch (SAXException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    /**
      * Show a menu to the user which allows him to choose
      * between encryption and decryption
      */
@@ -124,38 +173,34 @@ public class Menu {
         Scanner reader = new Scanner(System.in);
         String chosenAction;
         File inputFile;
-        String algoCode;
-        DoubleAlgo doubleAlgo = new DoubleAlgo();
-        doubleAlgo.setAlgorithm1(new CaesarAlgo());
-        doubleAlgo.setAlgorithm2(new XORAlgo());
-        //JAXBUtils.marshalAlgorithm(doubleAlgo, new File("double.xml"));
-        //Algorithm algorithm = JAXBUtils.unmarshalAlgorithm(new File("double.xml"));
-        //algorithm.encrypt(new File("C:/Users/Lior/Desktop/sdfg.txt"), reader);
+        Algorithm algorithm;
         while (true) {
             /*
             end the loop only when valid input is entered
              or when "x" is entered
              */
             try {
-                System.out.println(strings.getString("menuText"));
+                // choose encryption/decryption
+                System.out.println(strings.getString("menuActionText"));
                 chosenAction = UserInputUtils.getValidUserInput(Arrays.asList(
-                        encOption, decOption, exOption), reader);
-                if (chosenAction.equals(exOption)) {
+                        strings.getString("encOption"),
+                        strings.getString("decOption"),
+                        strings.getString("exOption")), reader);
+                if (chosenAction.equals(strings.getString("exOption"))) {
                     return;
                 }
-                // get file path and algorithm from the user
+                // get file path
                 System.out.println(strings.getString("srcPathText"));
                 inputFile = UserInputUtils.getInputFile(reader);
-                showAlgorithmsSelection();
-                algoCode = UserInputUtils.getValidUserInput(
-                        allAlgosMap.keySet(), reader);
+                // choose algorithm
+                algorithm = chooseAlgorithm(reader);
                 break;
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             }
         }
         //if the user entered 'e', execute Encryption. Otherwise, decryption
-        executeAlgorithm(chosenAction, inputFile, algoCode, reader);
+        executeAlgorithm(algorithm, chosenAction, inputFile, reader);
+        exportAlgorithm(algorithm, reader);
     }
-
 }

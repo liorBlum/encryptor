@@ -4,6 +4,8 @@ import Structure.Menu;
 import Utilities.UserInputUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.ResourceBundle;
 import java.util.Scanner;
@@ -13,23 +15,49 @@ import java.util.Scanner;
  * at least one independent algorithm as a member.
  */
 public abstract class DependentAlgorithm extends Algorithm {
-    protected final static ResourceBundle independentAlgosCodes =
-            ResourceBundle.getBundle("indep_algorithms");
-    /**
-     * Update Algorithm member(s) of this dependent algorithm
-     */
-    protected abstract void updateAlgorithmMembers(Scanner reader);
+    protected final static ResourceBundle algoClasses =
+            ResourceBundle.getBundle("algorithms_classes");
+    protected final static ResourceBundle algoNames =
+            ResourceBundle.getBundle("algorithms_names");
 
     /**
-     * Display all independent algorithms found in properties
+     * /**
+     * Algorithm protected constructor that is used to set the Algorithm's name
+     * @param name Algorithm's name
      */
-    protected void showIndepAlgorithmsSelection() {
-        Enumeration<String> indepAlgorithms = independentAlgosCodes.getKeys();
-        // go over all algorithms and print them as choices
-        while (indepAlgorithms.hasMoreElements()) {
-            String algo = indepAlgorithms.nextElement();
-            System.out.println("For " + algo + " Enter: "
-                    + independentAlgosCodes.getString(algo));
+    protected DependentAlgorithm(String name) {
+        super(name);
+    }
+
+    /**
+     * Update Algorithm member(s) of this dependent algorithm
+     * @param reader user input reader
+     * @throws IOException when properties file(s) is corrupted
+     */
+    protected abstract void updateAlgorithmMembers(Scanner reader)
+            throws IOException;
+
+    /**
+     * Display only independent algorithms found in properties
+     * (algorithms that extend Algorithm directly and not DependentAlgorithm)
+     * @throws IOException when a class from properties is not found
+     * in Algorithms package
+     */
+    protected void showIndepAlgorithmsSelection() throws IOException{
+        Enumeration<String> algoCodes = algoNames.getKeys();
+        try {
+            // go over all independent algorithms and print them as choices
+            while (algoCodes.hasMoreElements()) {
+                String algoCode = algoCodes.nextElement();
+                Class algoClass = Class.forName(strings.getString("algoPack")
+                        + algoClasses.getString(algoCode));
+                if (algoClass.getSuperclass() == (Algorithm.class)) {
+                    System.out.println("For " + algoNames.getString(algoCode)
+                            + " Enter: " + algoCode);
+                }
+            }
+        } catch (ClassNotFoundException e) {
+            throw new IOException(strings.getString("badPropFile"));
         }
     }
 
@@ -44,9 +72,25 @@ public abstract class DependentAlgorithm extends Algorithm {
         while (true) {
             try {
                 String algoCode = UserInputUtils.getValidUserInput(
-                        Menu.indepAlgosMap.keySet(), reader);
-                return Menu.indepAlgosMap.get(algoCode);
-            } catch (IllegalArgumentException e) {
+                        Collections.list(algoClasses.getKeys()), reader);
+                Class algoClass = Class.forName(strings.getString("algoPack")
+                        + algoClasses.getString(algoCode));
+                if (algoClass.getSuperclass() == (Algorithm.class)) {
+                    // get the algorithm object from the given algoCode
+                    String algoClassName = strings.getString("algoPack")
+                            + algoClasses.getString(algoCode);
+                    return (Algorithm)(
+                            Class.forName(algoClassName).newInstance());
+                } else {
+                    // if input algorithm is dependent, throw an exception
+                    // and continue the loop
+                    throw new IllegalArgumentException(
+                            strings.getString("depAlgoError"));
+                }
+
+            } catch (ClassNotFoundException e) {
+                System.out.println(strings.getString("algoNotFound"));
+            } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
         }
@@ -61,13 +105,25 @@ public abstract class DependentAlgorithm extends Algorithm {
 
     @Override
     public long encrypt(File inputFile, Scanner reader) {
-        updateAlgorithmMembers(reader);
-        return super.encrypt(inputFile, reader);
+        try {
+            updateAlgorithmMembers(reader);
+            return super.encrypt(inputFile, reader);
+        } catch (IOException e) {
+            System.out.println(e.getMessage() + "\n"
+                    + strings.getString("generalErrorMsg"));
+            return 0;
+        }
     }
 
     @Override
     public long decrypt(File inputFile, Scanner reader) {
-        updateAlgorithmMembers(reader);
-        return super.decrypt(inputFile, reader);
+        try {
+            updateAlgorithmMembers(reader);
+            return super.decrypt(inputFile, reader);
+        } catch (IOException e) {
+            System.out.println(e.getMessage() + "\n"
+                    + strings.getString("generalErrorMsg"));
+            return 0;
+        }
     }
 }

@@ -6,9 +6,14 @@ import javax.xml.bind.annotation.XmlRootElement;
  * Algorithm class used to encrypt/decrypt input files
  * using Caesar Algorithm.
  */
-@XmlRootElement(name="caeserAlgo")
+@XmlRootElement(name="caesarAlgo")
 public class CaesarAlgo extends Algorithm {
-
+    /**
+     * Algorithm constructor that is used to set the Algorithm's name
+     */
+    public CaesarAlgo() {
+        super("Caesar Algorithm");
+    }
     @Override
     protected byte encryptByte(byte b, int idx, Key keyObject) {
         return (byte)(b + keyObject.key);

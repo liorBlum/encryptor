@@ -31,7 +31,7 @@ public class TestMenu {
 
     @Test
     public void testInvalidInputs() throws IOException{
-        String menu_txt = strings.getString("menuText") + ls;
+        String menu_txt = strings.getString("menuActionText") + ls;
         String invalid_txt = strings.getString("inputErrorMsg") + ls;
         String invalidInput1 = "a";
         String invalidInput2 = "aaa";

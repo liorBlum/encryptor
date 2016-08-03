@@ -1,5 +1,8 @@
 package Algorithms;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.IOException;
 import java.util.Scanner;
@@ -10,10 +13,22 @@ import java.util.Scanner;
  */
 @XmlRootElement(name="reverseAlgo")
 public class ReverseAlgo extends DependentAlgorithm {
-    private Algorithm algorithm;
+    /**
+     * Get and set inner algorithm used by Reverse Algorithm
+     * @param algorithm algorithm
+     * @return algorithm
+     */
+    @Getter @Setter private Algorithm algorithm;
+
+    /**
+     * Algorithm constructor that is used to set the Algorithm's name
+     */
+    public ReverseAlgo() {
+        super("Reverse Algorithm");
+    }
 
     @Override
-    protected void updateAlgorithmMembers(Scanner reader) {
+    protected void updateAlgorithmMembers(Scanner reader) throws IOException {
         System.out.println(strings.getString("rvsMsg"));
         showIndepAlgorithmsSelection();
         algorithm = getIndepAlgorithmFromUser(reader);
@@ -37,13 +52,5 @@ public class ReverseAlgo extends DependentAlgorithm {
     @Override
     protected byte decryptByte(byte b, int idx, Key key) throws IOException {
         return algorithm.encryptByte(b, idx, key);
-    }
-
-    public Algorithm getAlgorithm() {
-        return algorithm;
-    }
-
-    public void setAlgorithm(Algorithm algorithm) {
-        this.algorithm = algorithm;
     }
 }

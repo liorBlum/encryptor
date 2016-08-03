@@ -15,7 +15,6 @@ public class UserInputUtils {
     private UserInputUtils() {}
     private final static ResourceBundle strings =
             ResourceBundle.getBundle("strings");
-    //public final static Scanner reader = new Scanner(System.in);
 
     /**
      * Get an input from the user (String) and return it only if it is
@@ -39,7 +38,7 @@ public class UserInputUtils {
 
     /**
      * Get a file path from the user and return the file
-     * which is denoted by that filepath.
+     * which is denoted by that filepath. The file must exist.
      * Can also receive a directory.
      * @param reader System.in scanner
      * @return file which is denoted by the given filepath
@@ -51,7 +50,8 @@ public class UserInputUtils {
         File file;
         file = new File(filePathString);
         // return a valid file object (file size must be in int range)
-        if (file.canRead() && (file.isDirectory() || file.length() <= Integer.MAX_VALUE )) {
+        if (file.canRead()
+                && (file.isDirectory() || file.length() <= Integer.MAX_VALUE )) {
             return file;
         } else {
             throw new IllegalArgumentException(

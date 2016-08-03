@@ -10,6 +10,13 @@ import java.util.Scanner;
 @XmlRootElement(name="mwoAlgo")
 public class MwoAlgo extends Algorithm {
     /**
+     * Algorithm constructor that is used to set the Algorithm's name
+     */
+    public MwoAlgo() {
+        super("Multiplication Algorithm");
+    }
+
+    /**
      * Get encryption key from the user and find decryption key for MWO
      * @return decryption key
      */

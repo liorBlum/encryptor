@@ -1,6 +1,9 @@
 package Algorithms;
 
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.IOException;
 import java.util.Scanner;
@@ -12,27 +15,28 @@ import java.util.Scanner;
  */
 @XmlRootElement(name="doubleAlgo")
 public class DoubleAlgo extends DependentAlgorithm {
-    private Algorithm algorithm1 = null;
-    private Algorithm algorithm2 = null;
+    /**
+     * Get and set inner algorithms used by Double Algorithm
+     * @param algorithm1 first algorithm
+     * @return first algorithm
+     */
+    @Getter @Setter private Algorithm algorithm1 = null;
+    /**
+     * Get and set inner algorithms used by Double Algorithm
+     * @param algorithm1 second algorithm
+     * @return second algorithm
+     */
+    @Getter @Setter private Algorithm algorithm2 = null;
 
-    public Algorithm getAlgorithm1() {
-        return algorithm1;
-    }
-
-    public Algorithm getAlgorithm2() {
-        return algorithm2;
-    }
-
-    public void setAlgorithm1(Algorithm algorithm1) {
-        this.algorithm1 = algorithm1;
-    }
-
-    public void setAlgorithm2(Algorithm algorithm2) {
-        this.algorithm2 = algorithm2;
+    /**
+     * Algorithm constructor that is used to set the Algorithm's name
+     */
+    public DoubleAlgo() {
+        super("Double Algorithm");
     }
 
     @Override
-    protected void updateAlgorithmMembers(Scanner reader) {
+    protected void updateAlgorithmMembers(Scanner reader) throws IOException {
         if ((algorithm1 == null) || (algorithm2 == null)) {
             System.out.println(strings.getString("doubleAlgoMsg"));
             showIndepAlgorithmsSelection();
@@ -71,7 +75,7 @@ public class DoubleAlgo extends DependentAlgorithm {
         Key algo1Key = new Key(encryptionKey.key);
         Key algo2Key = new Key(encryptionKey.secondKey);
         return new Key(algorithm1.getDecryptionKey(algo1Key).key,
-                        algorithm2.getDecryptionKey(algo2Key).key);
+                algorithm2.getDecryptionKey(algo2Key).key);
     }
 
     @Override
@@ -101,6 +105,4 @@ public class DoubleAlgo extends DependentAlgorithm {
         return algorithm1.decryptByte(
                 algorithm2.decryptByte(b, idx, secondKey), idx, firstKey);
     }
-
-
 }

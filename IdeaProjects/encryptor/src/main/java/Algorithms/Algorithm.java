@@ -3,7 +3,7 @@ package Algorithms;
 import Utilities.FileModifierUtils;
 import Utilities.SerializationUtils;
 import Utilities.UserInputUtils;
-
+import lombok.Getter;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import java.io.File;
 import java.io.IOException;
@@ -20,11 +20,24 @@ import java.util.concurrent.TimeUnit;
 @XmlSeeAlso({CaesarAlgo.class, DoubleAlgo.class, XORAlgo.class, MwoAlgo.class,
             ReverseAlgo.class,SplitAlgo.class})
 public abstract class Algorithm extends Observable {
+    /**
+     * Get the Algorithm's name
+     * @return algorithm's name
+     */
+    @Getter private final String name;
     private String syncOpt = "s";
     private String asyncOpt = "a";
     protected final static ResourceBundle strings =
             ResourceBundle.getBundle("strings");
     protected Random randomizer = new Random();
+
+    /**
+     * Algorithm protected constructor that is used to set the Algorithm's name
+     * @param name Algorithm's name
+     */
+    protected Algorithm(String name) {
+        this.name = name;
+    }
 
     /**
      * Get the file path of the encryption key from the user input
@@ -140,16 +153,10 @@ public abstract class Algorithm extends Observable {
             }
             // run the algorithm on the file with outer class' parameters
             public void run() {
-                //DEBUG
-                System.out.println(Thread.currentThread().getName()
-                        + " Start. File = " + file.getName());
                 try {
                     execAlgoOnFile(file, key,
                             processedDirectory.getPath() + "/" + file.getName(),
                             actionCode);
-                    //DEBUG
-                    System.out.println(Thread.currentThread().getName()
-                            + " End. File = " + file.getName());
                 } catch (Exception e) {
                     System.out.println(strings.getString("singleFileError")
                             + file.getName() + " : " + e.getMessage());
