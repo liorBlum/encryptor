@@ -1,7 +1,11 @@
+
 package TestStructure;
+
 /**
  * Tests for the menu
  */
+
+
 import Structure.Menu;
 import org.junit.Test;
 
@@ -9,6 +13,7 @@ import java.io.*;
 import java.util.ResourceBundle;
 
 import static org.junit.Assert.assertEquals;
+
 
 public class TestMenu {
     private final PrintStream defOutStream = System.out;
@@ -19,11 +24,13 @@ public class TestMenu {
     private final String ls = System.getProperty("line.separator");
     @Test
     public void testInstantiation() {
-        /*
+
+/*
         the first call will create the object,
          the second is supposed to return
           that same object and not create a new one
           */
+
         Menu menu1 = Menu.getInstance();
         Menu menu2 = Menu.getInstance();
         assertEquals(menu1, menu2);

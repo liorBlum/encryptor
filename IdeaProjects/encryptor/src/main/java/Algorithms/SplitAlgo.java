@@ -1,5 +1,6 @@
 package Algorithms;
 
+import com.google.inject.Singleton;
 import lombok.Getter;
 import lombok.Setter;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -10,6 +11,7 @@ import java.util.Scanner;
  * Algorithm class used to encrypt/decrypt input files
  * using Split Algorithm.
  */
+@Singleton
 @XmlRootElement(name="splitAlgo")
 public class SplitAlgo extends DependentAlgorithm {
     /**

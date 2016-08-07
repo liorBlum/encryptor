@@ -1,12 +1,15 @@
 package Algorithms;
 
 
+import com.google.inject.Singleton;
+
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Scanner;
 /**
  * Algorithm class used to encrypt/decrypt input files
  * using Multiplication Algorithm.
  */
+@Singleton
 @XmlRootElement(name="mwoAlgo")
 public class MwoAlgo extends Algorithm {
     /**

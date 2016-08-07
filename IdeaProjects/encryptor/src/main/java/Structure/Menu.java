@@ -1,9 +1,14 @@
 package Structure;
 
 import Algorithms.*;
+import Utilities.JAXBCustomEventHandler;
 import Utilities.JAXBUtils;
 import Utilities.UserInputUtils;
+
+import com.google.inject.Singleton;
 import org.xml.sax.SAXException;
+
+
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.util.*;
@@ -11,6 +16,7 @@ import java.util.*;
 /**
  * Menu class with Singleton pattern
  */
+@Singleton
 public class Menu {
     private static Menu instance = null;
     private final ResourceBundle strings =
@@ -65,7 +71,7 @@ public class Menu {
             System.out.println(strings.getString("generalErrorMsg"));
         } else {
             System.out.println(strings.getString("elapsedTimeTxt") + " "
-                    + (float) elapsedTime / 1000000 + " milliseconds\n");
+                    + (double) elapsedTime / 1000000 + " milliseconds\n");
         }
     }
 
@@ -105,12 +111,18 @@ public class Menu {
                 );
                 if (chosenOption.equals(strings.getString("defOpt"))) {
                     // use default algorithm
-                    return JAXBUtils.unmarshalAlgorithm(defXmlFile);
+                    return (Algorithm)JAXBUtils.unmarshalObject(defXmlFile,
+                            new File(strings.getString("algoSchemaFile")),
+                            new JAXBCustomEventHandler(),
+                            new Class[]{Algorithm.class});
                 } else if (chosenOption.equals(strings.getString("importOpt"))) {
                     // use imported algorithm
                     System.out.println(strings.getString("CfgFilePathMsg"));
                     File algoCfgFile = UserInputUtils.getInputFile(reader);
-                    return JAXBUtils.unmarshalAlgorithm(algoCfgFile);
+                    return (Algorithm)JAXBUtils.unmarshalObject(algoCfgFile,
+                            new File(strings.getString("algoSchemaFile")),
+                            new JAXBCustomEventHandler(),
+                            new Class[]{Algorithm.class});
                 } else {
                     // choose algorithm manually
                     showAlgorithmsSelection();
@@ -119,10 +131,11 @@ public class Menu {
                     // get the algorithm object from the given algoCode
                     String algoClassName = strings.getString("algoPack")
                             + algoClasses.getString(algoCode);
-                    return (Algorithm)(Class.forName(algoClassName).newInstance());
+                    return (Algorithm)(
+                            Class.forName(algoClassName).newInstance());
                 }
             }  catch (JAXBException e) {
-                System.out.println(strings.getString("algoDefError"));
+                System.out.println(e.getMessage());
             }  catch (ClassNotFoundException e) {
                 System.out.println(strings.getString("algoNotFound"));
             } catch (Exception e) {
@@ -149,7 +162,10 @@ public class Menu {
                     // marshal the algorithm into the given file path
                     System.out.println(strings.getString("CfgFilePathMsg"));
                     File algoCfgFile = new File(reader.nextLine());
-                    JAXBUtils.marshalAlgorithm(algorithm, algoCfgFile);
+                    JAXBUtils.marshalObject(algorithm, algoCfgFile,
+                            new File(strings.getString("algoSchemaFile")),
+                            new JAXBCustomEventHandler(),
+                            new Class[]{Algorithm.class});
                     System.out.println(strings.getString("exportSuccessMsg"));
                     break;
                 } else if (chosenOption.equals(strings.getString("noOpt"))) {

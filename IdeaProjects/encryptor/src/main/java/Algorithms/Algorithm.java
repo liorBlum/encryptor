@@ -1,12 +1,14 @@
 package Algorithms;
 
+import Logs.DirectoryReport;
+import Logs.FileReport;
 import Utilities.FileModifierUtils;
+import Utilities.JAXBUtils;
 import Utilities.SerializationUtils;
 import Utilities.UserInputUtils;
 import lombok.Getter;
 import javax.xml.bind.annotation.XmlSeeAlso;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -101,11 +103,12 @@ public abstract class Algorithm extends Observable {
      * @param key key
      * @param destinationFilePath filepath of the outcome
      * @param actionCode "e" for encryption / "d" for decryption
-     * @throws IOException when I/O error occurs
-     * @throws IllegalArgumentException when unexpected error occurs
+     * @return how much the process took (in nanoseconds)
+     * @throws Exception when I/O error occurs/when unexpected error occurs
      */
-    protected void execAlgoOnFile(File file, Key key, String destinationFilePath,
+    protected long execAlgoOnFile(File file, Key key, String destinationFilePath,
                                   String actionCode) throws Exception {
+        long startTime = System.nanoTime();
         // initialize a byte array to contain processed bytes
         int fileLength = (int)file.length();
         byte[] processedBytes = new byte[fileLength];
@@ -126,6 +129,7 @@ public abstract class Algorithm extends Observable {
         File processedFile =
                 FileModifierUtils.createNewFileInPath(destinationFilePath);
         FileModifierUtils.writeBytesToFile(processedBytes, processedFile);
+        return System.nanoTime() - startTime;
     }
 
     /**
@@ -136,9 +140,10 @@ public abstract class Algorithm extends Observable {
      *                           processed files (encrypted/decrypted)
      * @param actionCode "e" for encryption / "d" for decryption
      * @param syncCode "s" for sync / "a" for async
+     * @return how much the process took (in nanoseconds)
      * @throws Exception when invalid input is entered/ unexpected error
      */
-    protected void execAlgoOnDirectory(File directory, final Key key,
+    protected long execAlgoOnDirectory(File directory, final Key key,
                                        final File processedDirectory,
                                        final String actionCode,
                                        String syncCode) throws Exception {
@@ -147,22 +152,39 @@ public abstract class Algorithm extends Observable {
          */
         class ExecAlgoOnFileJob implements Runnable {
             File file;
-            // construct class with a given file
-            private ExecAlgoOnFileJob(File file) {
+            FileReport fr;
+
+            /**
+             * Construct the job with a given file and an empty file report
+             * @param file input file
+             * @param fr empty file report (to report status)
+             */
+            private ExecAlgoOnFileJob(File file, FileReport fr) {
                 this.file = file;
+                this.fr = fr;
             }
             // run the algorithm on the file with outer class' parameters
             public void run() {
                 try {
-                    execAlgoOnFile(file, key,
+                    fr.setFileName(file.getName());
+                    long elapsedTime = execAlgoOnFile(file, key,
                             processedDirectory.getPath() + "/" + file.getName(),
                             actionCode);
+                    // write the result in a file report
+                    fr.setSucceded(true);
+                    fr.setTime((double)elapsedTime / 1000000);
                 } catch (Exception e) {
-                    System.out.println(strings.getString("singleFileError")
-                            + file.getName() + " : " + e.getMessage());
+                    fr.setSucceded(false);
+                    fr.setExceptionName(e.getClass().getCanonicalName());
+                    fr.setExceptionMessage(e.getMessage());
+                    // the stacktrace will only include the invoking method
+                    fr.setExceptionStacktrace(e.getStackTrace()[0].toString());
                 }
             }
         }
+        //start measuring time
+        long startTime = System.nanoTime();
+        DirectoryReport dr = new DirectoryReport();
         // source/outcome directories must both be directories
         if (!directory.isDirectory() || !processedDirectory.isDirectory()) {
             throw new IllegalArgumentException(
@@ -175,13 +197,15 @@ public abstract class Algorithm extends Observable {
         }
         if (syncCode.equals(syncOpt)) {
             // process the directory file-by-file synchronously
-            for (File file : files) {
+            for (final File file : files) {
                 if (file.canRead() && file.isFile()) {
-                    (new ExecAlgoOnFileJob(file)).run();
+                    FileReport fr = new FileReport();
+                    (new ExecAlgoOnFileJob(file, fr)).run();
+                    dr.addFileReport(fr);
                 }
             }
-        // process the directory using threads
         } else if(syncCode.equals(asyncOpt)) {
+            // process the directory using threads
             // executor uses 1 element queue so that files never wait
             ThreadPoolExecutor executor = new ThreadPoolExecutor(
                     0, Integer.MAX_VALUE,
@@ -189,7 +213,9 @@ public abstract class Algorithm extends Observable {
                     new ArrayBlockingQueue<Runnable>(1));
             for (final File file : files) {
                 if (file.canRead() && file.isFile()) {
-                    executor.execute(new ExecAlgoOnFileJob(file));
+                    FileReport fr = new FileReport();
+                    executor.execute(new ExecAlgoOnFileJob(file, fr));
+                    dr.addFileReport(fr);
                 }
             }
             executor.shutdown();
@@ -198,26 +224,32 @@ public abstract class Algorithm extends Observable {
             throw new IllegalArgumentException(
                     strings.getString("unexpectedErrorMsg"));
         }
+        long elapsedTime = System.nanoTime() - startTime;
+        // write status report on the encryption/decryption
+        JAXBUtils.marshalObject(
+                dr, new File(strings.getString("xmlReportFile")),
+                new Class[]{FileReport.class, DirectoryReport.class});
+        return elapsedTime;
     }
     /**
      * Encrypt an input file/directory
      * and write the result in a new file/directory.
      * @param inputFile an input file/directory
-     * @return the exact time the encryption process began
+     * @param reader user input reader
+     * @return the exact time the encryption process took (in nanoseconds)
      */
     public long encrypt(File inputFile, Scanner reader) {
         try {
             // Generate a random encryption key
             Key key = generateKey();
             File keyFile;
-            long startTime;
+            long elapsedTime;
             // start encrypting file/directory
             if (inputFile.isFile()) {
-                // notify observers that encryption started and measure time
+                // notify observers that encryption started
                 setChanged();
                 notifyObservers(strings.getString("encStartMsg"));
-                startTime = System.nanoTime();
-                execAlgoOnFile(inputFile, key, inputFile.getPath()
+                elapsedTime = execAlgoOnFile(inputFile, key, inputFile.getPath()
                         + ".encrypted", strings.getString("encOption"));
                 // the key is stored in the same directory
                 keyFile = new File(inputFile.getParent(),
@@ -230,12 +262,12 @@ public abstract class Algorithm extends Observable {
                 // notify observers that encryption started and measure time
                 setChanged();
                 notifyObservers(strings.getString("encStartMsg"));
-                startTime = System.nanoTime();
                 // create encrypted sub-directory and encrypt input directory
                 File encryptedDirectory = new File(inputFile, "encrypted");
                 encryptedDirectory.mkdir();
-                execAlgoOnDirectory(inputFile, key, encryptedDirectory,
-                        strings.getString("encOption"), syncCode);
+                elapsedTime = execAlgoOnDirectory(inputFile, key,
+                        encryptedDirectory, strings.getString("encOption"),
+                        syncCode);
                 // the key is stored in 'encrypted' directory
                 keyFile = new File(inputFile,
                         strings.getString("keyFileName"));
@@ -243,18 +275,15 @@ public abstract class Algorithm extends Observable {
                 System.out.println(strings.getString("unexpectedErrorMsg"));
                 return 0;
             }
-            // serialize the kay
+            // serialize the key
             SerializationUtils.serializeObject(keyFile, key);
             setChanged();
+            // notify observers that decryption ended and return elapsed time
             notifyObservers(strings.getString("encEndMsg"));
             System.out.println(strings.getString("keyMsg"));
-            // return elapsed time after encryption ends
-            return System.nanoTime() - startTime;
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-            return 0;
+            return elapsedTime;
         } catch (Exception e) {
-            System.out.println(strings.getString("unexpectedErrorMsg"));
+            System.out.println(e.getMessage());
             return 0;
         }
     }
@@ -263,6 +292,7 @@ public abstract class Algorithm extends Observable {
      * Decrypt an input file/directory
      * and write the result in a new file/directory.
      * @param inputFile an input file/directory.
+     * @param reader user input reader
      * @return the exact time the decryption process took
      */
     public long decrypt(File inputFile, Scanner reader) {
@@ -284,15 +314,15 @@ public abstract class Algorithm extends Observable {
             }
             String fileName = inputFile.getPath().substring(0, fileExtIdx);
             String fileExtension = inputFile.getPath().substring(fileExtIdx);
-            long startTime;
+            long elapsedTime;
             // start decrypting the file/directory
             if (inputFile.isFile()) {
                 // notify observers that decryption started and measure time
                 setChanged();
                 notifyObservers(strings.getString("decStartMsg"));
-                startTime = System.nanoTime();
-                execAlgoOnFile(inputFile, key, fileName + "_decrypted"
-                        + fileExtension, strings.getString("decOption"));
+                elapsedTime = execAlgoOnFile(inputFile, key,
+                        fileName + "_decrypted" + fileExtension,
+                        strings.getString("decOption"));
             } else if (inputFile.isDirectory()) {
                 // get sync/async from the user
                 System.out.println(strings.getString("syncText"));
@@ -301,12 +331,12 @@ public abstract class Algorithm extends Observable {
                 // notify observers that decryption started and measure time
                 setChanged();
                 notifyObservers(strings.getString("decStartMsg"));
-                startTime = System.nanoTime();
                 // create decrypted sub-directory and decrypt input directory
                 File decryptedDirectory = new File(inputFile, "decrypted");
                 decryptedDirectory.mkdir();
-                execAlgoOnDirectory(inputFile, key, decryptedDirectory,
-                        strings.getString("decOption"), syncCode);
+                elapsedTime = execAlgoOnDirectory(inputFile, key,
+                        decryptedDirectory, strings.getString("decOption"),
+                        syncCode);
             } else {
                 System.out.println(strings.getString("unexpectedErrorMsg"));
                 return 0;
@@ -314,12 +344,9 @@ public abstract class Algorithm extends Observable {
             // notify observers that decryption ended and return elapsed time
             setChanged();
             notifyObservers(strings.getString("decEndMsg"));
-            return System.nanoTime() - startTime;
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-            return 0;
+            return elapsedTime;
         } catch (Exception e) {
-            System.out.println(strings.getString("unexpectedErrorMsg"));
+            System.out.println(e.getMessage());
             return 0;
         }
     }

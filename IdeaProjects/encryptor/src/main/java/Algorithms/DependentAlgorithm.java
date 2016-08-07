@@ -1,10 +1,9 @@
 package Algorithms;
 
-import Structure.Menu;
 import Utilities.UserInputUtils;
-
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.ResourceBundle;

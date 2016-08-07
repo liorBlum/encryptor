@@ -1,11 +1,15 @@
 package Algorithms;
 
+
+import com.google.inject.Singleton;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Algorithm class used to encrypt/decrypt input files
  * using Caesar Algorithm.
  */
+@Singleton
 @XmlRootElement(name="caesarAlgo")
 public class CaesarAlgo extends Algorithm {
     /**

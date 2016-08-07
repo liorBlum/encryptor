@@ -1,5 +1,6 @@
-package Structure;
+package Logs;
 
+import Logs.FileReport;
 import lombok.Getter;
 import lombok.Setter;
 

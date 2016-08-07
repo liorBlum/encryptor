@@ -3,10 +3,7 @@ package Utilities;
 import Algorithms.*;
 import org.xml.sax.SAXException;
 import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.*;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.File;
@@ -21,44 +18,79 @@ public final class JAXBUtils {
     private JAXBUtils() {}
 
     /**
-     * Marshal an Algorithm object into a given XML file.
-     * @param algorithm Algorithm object
+     * Marshal an Object object into a given XML file using
+     * an optional validation schema and an optional custom event handler.
+     * @param object object
      * @param file XML file
      * @throws JAXBException when XML validation fails
      * @throws SAXException when Schema's parsing triggers an error
      */
-    public static void marshalAlgorithm(Algorithm algorithm, File file)
+    public static void marshalObject(Object object, File file, File schemaFile,
+                                        ValidationEventHandler handler,
+                                        Class[] classesToBeBound)
             throws JAXBException, SAXException {
-        JAXBContext jaxbContext = JAXBContext.newInstance(Algorithm.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance(classesToBeBound);
         Marshaller marshaller = jaxbContext.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        // validate class with schema file
-        SchemaFactory sf = SchemaFactory.newInstance(
-                XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        Schema schema = sf.newSchema(new File("schema1.xsd"));
-        marshaller.setSchema(schema);
-        marshaller.setEventHandler(new JAXBCustomEventHandler());
 
-        marshaller.marshal(algorithm, file);
+        // validate class with schema file
+        if (schemaFile != null) {
+            SchemaFactory sf = SchemaFactory.newInstance(
+                    XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            marshaller.setSchema(sf.newSchema(schemaFile));
+        }
+        // set an event handler for the marshaller
+        marshaller.setEventHandler(handler);
+        marshaller.marshal(object, file);
     }
 
     /**
-     * Unmarshal an XML file into an Algorithm object.
+     * Marshal an object with no schema validation.
+     * @param object
+     * @param file
+     * @param classesToBeBound
+     */
+    public static void marshalObject(Object object, File file,
+                                     Class[] classesToBeBound)
+            throws JAXBException, SAXException{
+        marshalObject(object, file, null, null, classesToBeBound);
+    }
+
+    /**
+     * Unmarshal an Object from an XML file using an optional validation schema
+     * and an optional custom event handler.
      * @param file XML file
+     * @return unmarshalled object from XML file
      * @throws JAXBException when XML validation fails
      * @throws SAXException when Schema's parsing triggers an error
      */
-    public static Algorithm unmarshalAlgorithm(File file)
+    public static Object unmarshalObject(File file, File schemaFile,
+                                            ValidationEventHandler handler,
+                                            Class[] classesToBeBound)
             throws JAXBException, SAXException {
-        JAXBContext jaxbContext = JAXBContext.newInstance(Algorithm.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance(classesToBeBound);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        // validate XML file with schema file
-        SchemaFactory sf = SchemaFactory.newInstance(
-                XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        Schema schema = sf.newSchema(new File("schema1.xsd"));
-        unmarshaller.setSchema(schema);
-        unmarshaller.setEventHandler(new JAXBCustomEventHandler());
+        // validate class with schema file
+        if (schemaFile != null) {
+            SchemaFactory sf = SchemaFactory.newInstance(
+                    XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            unmarshaller.setSchema(sf.newSchema(schemaFile));
+        }
+        // set an event handler for the marshaller
+        if (handler != null) {
+            unmarshaller.setEventHandler(handler);
+        }
+        return unmarshaller.unmarshal(file);
+    }
 
-        return (Algorithm) unmarshaller.unmarshal(file);
+
+    /**
+     * Unmarshal an object with no schema validation.
+     * @param file
+     * @param classesToBeBound
+     */
+    public static Object unmarshalObject(File file, Class[] classesToBeBound)
+            throws JAXBException, SAXException{
+        return unmarshalObject(file, null, null, classesToBeBound);
     }
 }
