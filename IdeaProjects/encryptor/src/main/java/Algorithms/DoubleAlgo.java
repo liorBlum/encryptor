@@ -14,7 +14,6 @@ import java.util.Scanner;
  * Algorithm class used to encrypt/decrypt input files
  * using Double Algorithm.
  */
-@Singleton
 @XmlRootElement(name="doubleAlgo")
 public class DoubleAlgo extends DependentAlgorithm {
     /**

@@ -22,6 +22,7 @@ public final class JAXBUtils {
      * an optional validation schema and an optional custom event handler.
      * @param object object
      * @param file XML file
+     * @param classesToBeBound class to bind to the marshaller
      * @throws JAXBException when XML validation fails
      * @throws SAXException when Schema's parsing triggers an error
      */
@@ -46,9 +47,9 @@ public final class JAXBUtils {
 
     /**
      * Marshal an object with no schema validation.
-     * @param object
-     * @param file
-     * @param classesToBeBound
+     * @param object object
+     * @param file XML file
+     * @param classesToBeBound class to bind to the marshaller
      */
     public static void marshalObject(Object object, File file,
                                      Class[] classesToBeBound)
@@ -60,6 +61,7 @@ public final class JAXBUtils {
      * Unmarshal an Object from an XML file using an optional validation schema
      * and an optional custom event handler.
      * @param file XML file
+     * @param classesToBeBound class to bind to the unmarshaller
      * @return unmarshalled object from XML file
      * @throws JAXBException when XML validation fails
      * @throws SAXException when Schema's parsing triggers an error
@@ -86,8 +88,8 @@ public final class JAXBUtils {
 
     /**
      * Unmarshal an object with no schema validation.
-     * @param file
-     * @param classesToBeBound
+     * @param file XML file
+     * @param classesToBeBound class to bind to the unmarshaller
      */
     public static Object unmarshalObject(File file, Class[] classesToBeBound)
             throws JAXBException, SAXException{

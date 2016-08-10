@@ -9,7 +9,6 @@ import java.util.Scanner;
  * Algorithm class used to encrypt/decrypt input files
  * using Multiplication Algorithm.
  */
-@Singleton
 @XmlRootElement(name="mwoAlgo")
 public class MwoAlgo extends Algorithm {
     /**

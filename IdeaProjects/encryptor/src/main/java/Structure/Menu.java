@@ -5,6 +5,8 @@ import Utilities.JAXBCustomEventHandler;
 import Utilities.JAXBUtils;
 import Utilities.UserInputUtils;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.xml.sax.SAXException;
 
@@ -45,102 +47,27 @@ public class Menu {
     /**
      * Execute encryption/decryption on a given file and print elapsed time
      * using a given algorithm.
+     * @param executor AlgoExecutor tht holds the desired algorithm
      * @param actionCode action char('e'/'d')
      * @param file given file
-     * @param algorithm Desired encryption algorithm
      * @param reader user input reader
      */
-    private void executeAlgorithm(Algorithm algorithm, String actionCode,
+    private void executeAlgorithm(AlgoExecutor executor, String actionCode,
                                   File file, Scanner reader) {
-        // add an observer in order to notify
-        // the user when action started\ended
-        algorithm.addObserver(new Observer() {
-            public void update(Observable o, Object arg) {
-                System.out.println(arg);
-            }
-        });
-        System.out.println("Executing " + algorithm.getName() + "...");
-        long elapsedTime = 0;
+        System.out.println("Executing " + executor.getAlgoName() + "...");
+        double elapsedTime = 0.0;
         if (actionCode.equals(strings.getString("encOption"))) {
             // execute action and measure the time it took
-            elapsedTime = algorithm.encrypt(file, reader);
+            elapsedTime = executor.encrypt(file, reader);
         } else if (actionCode.equals(strings.getString("decOption"))) {
-            elapsedTime = algorithm.decrypt(file, reader);
+            elapsedTime = executor.decrypt(file, reader);
         }
         if (elapsedTime == 0) {
             System.out.println(strings.getString("generalErrorMsg"));
         } else {
+            // print elapsed time in milliseconds
             System.out.println(strings.getString("elapsedTimeTxt") + " "
-                    + (double) elapsedTime / 1000000 + " milliseconds\n");
-        }
-    }
-
-    /**
-     * Display all algorithms found in properties
-     */
-    private void showAlgorithmsSelection() {
-        System.out.println(strings.getString("algoMsg"));
-        Enumeration<String> algorithmCodes = algoNames.getKeys();
-        // go over all algorithms and print them as choices
-        while (algorithmCodes.hasMoreElements()) {
-            String algoCode = algorithmCodes.nextElement();
-            System.out.println("For " + algoNames.getString(algoCode)
-                    + " Enter: " + algoCode);
-        }
-    }
-
-    /**
-     * Let the user choose algorithm in 3 possible methods:
-     * using default algorithm (loaded from default.xml),
-     * using an imported algorithm
-     * @param reader user input reader
-     * @return desired algorithm
-     */
-    private Algorithm chooseAlgorithm(Scanner reader) {
-        File defXmlFile = new File(strings.getString("defAlgoDefFile"));
-        String chosenOption;
-        System.out.println(strings.getString("algoChooseMsg"));
-        while (true) {
-            try {
-                // present the 3 options to the user
-                System.out.println(strings.getString("menuAlgoTxt"));
-                chosenOption = UserInputUtils.getValidUserInput(Arrays.asList(
-                        strings.getString("defOpt"),
-                        strings.getString("importOpt"),
-                        strings.getString("manuOpt")), reader
-                );
-                if (chosenOption.equals(strings.getString("defOpt"))) {
-                    // use default algorithm
-                    return (Algorithm)JAXBUtils.unmarshalObject(defXmlFile,
-                            new File(strings.getString("algoSchemaFile")),
-                            new JAXBCustomEventHandler(),
-                            new Class[]{Algorithm.class});
-                } else if (chosenOption.equals(strings.getString("importOpt"))) {
-                    // use imported algorithm
-                    System.out.println(strings.getString("CfgFilePathMsg"));
-                    File algoCfgFile = UserInputUtils.getInputFile(reader);
-                    return (Algorithm)JAXBUtils.unmarshalObject(algoCfgFile,
-                            new File(strings.getString("algoSchemaFile")),
-                            new JAXBCustomEventHandler(),
-                            new Class[]{Algorithm.class});
-                } else {
-                    // choose algorithm manually
-                    showAlgorithmsSelection();
-                    String algoCode = UserInputUtils.getValidUserInput(
-                            Collections.list(algoClasses.getKeys()), reader);
-                    // get the algorithm object from the given algoCode
-                    String algoClassName = strings.getString("algoPack")
-                            + algoClasses.getString(algoCode);
-                    return (Algorithm)(
-                            Class.forName(algoClassName).newInstance());
-                }
-            }  catch (JAXBException e) {
-                System.out.println(e.getMessage());
-            }  catch (ClassNotFoundException e) {
-                System.out.println(strings.getString("algoNotFound"));
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
+                    + elapsedTime + " milliseconds\n");
         }
     }
 
@@ -189,7 +116,7 @@ public class Menu {
         Scanner reader = new Scanner(System.in);
         String chosenAction;
         File inputFile;
-        Algorithm algorithm;
+        AlgoExecutor executor;
         while (true) {
             /*
             end the loop only when valid input is entered
@@ -208,15 +135,16 @@ public class Menu {
                 // get file path
                 System.out.println(strings.getString("srcPathText"));
                 inputFile = UserInputUtils.getInputFile(reader);
-                // choose algorithm
-                algorithm = chooseAlgorithm(reader);
+                // get AlgoExecutor injected with the desired Algorithm
+                Injector injector = Guice.createInjector(new AlgoInjector());
+                executor = injector.getInstance(AlgoExecutor.class);
                 break;
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             }
         }
         //if the user entered 'e', execute Encryption. Otherwise, decryption
-        executeAlgorithm(algorithm, chosenAction, inputFile, reader);
-        exportAlgorithm(algorithm, reader);
+        executeAlgorithm(executor, chosenAction, inputFile, reader);
+        exportAlgorithm(executor.getAlgorithm(), reader);
     }
 }

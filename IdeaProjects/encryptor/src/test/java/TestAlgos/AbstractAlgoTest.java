@@ -103,7 +103,7 @@ public abstract class AbstractAlgoTest {
         System.setIn(isIn);
         Scanner reader = new Scanner(System.in);
         // encrypt the example files
-        long elapsedTime = algorithm.encrypt(exampleFolder, reader);
+        double elapsedTime = algorithm.encrypt(exampleFolder, reader);
         // test if encryption's time was measured correctly
         assertTrue(elapsedTime > 0);
         File encryptedFolder = new File(exampleFolder, "encrypted");

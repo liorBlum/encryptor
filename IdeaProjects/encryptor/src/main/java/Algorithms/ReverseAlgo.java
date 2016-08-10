@@ -12,7 +12,6 @@ import java.util.Scanner;
  * Algorithm class used to encrypt/decrypt input files
  * using Reverse Algorithm.
  */
-@Singleton
 @XmlRootElement(name="reverseAlgo")
 public class ReverseAlgo extends DependentAlgorithm {
     /**

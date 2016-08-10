@@ -11,7 +11,6 @@ import java.util.Scanner;
  * Algorithm class used to encrypt/decrypt input files
  * using Split Algorithm.
  */
-@Singleton
 @XmlRootElement(name="splitAlgo")
 public class SplitAlgo extends DependentAlgorithm {
     /**

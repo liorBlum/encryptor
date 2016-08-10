@@ -3,7 +3,6 @@ package Algorithms;
 import Utilities.UserInputUtils;
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.ResourceBundle;
@@ -28,8 +27,12 @@ public abstract class DependentAlgorithm extends Algorithm {
         super(name);
     }
 
+    /*default no-arg constructor for algorithms with no specific name*/
+    public DependentAlgorithm() {}
+
     /**
-     * Update Algorithm member(s) of this dependent algorithm
+     * Update Algorithm member(s) of this dependent algorithm if
+     * they are empty (using user selection).
      * @param reader user input reader
      * @throws IOException when properties file(s) is corrupted
      */
@@ -103,7 +106,7 @@ public abstract class DependentAlgorithm extends Algorithm {
             throws Exception;
 
     @Override
-    public long encrypt(File inputFile, Scanner reader) {
+    public double encrypt(File inputFile, Scanner reader) {
         try {
             updateAlgorithmMembers(reader);
             return super.encrypt(inputFile, reader);
@@ -115,7 +118,7 @@ public abstract class DependentAlgorithm extends Algorithm {
     }
 
     @Override
-    public long decrypt(File inputFile, Scanner reader) {
+    public double decrypt(File inputFile, Scanner reader) {
         try {
             updateAlgorithmMembers(reader);
             return super.decrypt(inputFile, reader);
