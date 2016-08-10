@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * using Caesar Algorithm.
  */
 @XmlRootElement(name="caesarAlgo")
-public class CaesarAlgo extends Algorithm {
+public class CaesarAlgo extends IndependentAlgorithm {
     /**
      * Algorithm constructor that is used to set the Algorithm's name
      */

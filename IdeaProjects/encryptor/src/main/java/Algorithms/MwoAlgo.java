@@ -10,7 +10,7 @@ import java.util.Scanner;
  * using Multiplication Algorithm.
  */
 @XmlRootElement(name="mwoAlgo")
-public class MwoAlgo extends Algorithm {
+public class MwoAlgo extends IndependentAlgorithm {
     /**
      * Algorithm constructor that is used to set the Algorithm's name
      */

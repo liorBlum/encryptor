@@ -19,7 +19,7 @@ public class ReverseAlgo extends DependentAlgorithm {
      * @param algorithm algorithm
      * @return algorithm
      */
-    @Getter @Setter private Algorithm algorithm = null;
+    @Getter @Setter private IndependentAlgorithm algorithm = null;
 
     /**
      * Algorithm constructor that is used to set the Algorithm's name

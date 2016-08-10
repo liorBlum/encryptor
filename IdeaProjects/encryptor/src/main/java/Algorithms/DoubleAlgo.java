@@ -21,13 +21,13 @@ public class DoubleAlgo extends DependentAlgorithm {
      * @param algorithm1 first algorithm
      * @return first algorithm
      */
-    @Getter @Setter private Algorithm algorithm1 = null;
+    @Getter @Setter private IndependentAlgorithm algorithm1 = null;
     /**
      * Get and set inner algorithms used by Double Algorithm
      * @param algorithm1 second algorithm
      * @return second algorithm
      */
-    @Getter @Setter private Algorithm algorithm2 = null;
+    @Getter @Setter private IndependentAlgorithm algorithm2 = null;
 
     /**
      * Algorithm constructor that is used to set the Algorithm's name

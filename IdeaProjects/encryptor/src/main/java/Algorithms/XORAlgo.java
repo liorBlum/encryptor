@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * using XOR Algorithm.
  */
 @XmlRootElement(name="xorAlgo")
-public class XORAlgo extends Algorithm {
+public class XORAlgo extends IndependentAlgorithm {
     /**
      * Algorithm constructor that is used to set the Algorithm's name
      */

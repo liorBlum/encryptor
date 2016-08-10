@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Abstract class for algorithms
  *
- * ALL ALGORITHMS MUST BE IN "XmlSeeAlso" ANNOTATION
+ * ALL ALGORITHMS MUST BE IN "XmlSeeAlso" ANNOTATION (for JAXB to recognise)
  */
 @XmlSeeAlso({CaesarAlgo.class, DoubleAlgo.class, XORAlgo.class, MwoAlgo.class,
             ReverseAlgo.class,SplitAlgo.class})
@@ -31,7 +31,6 @@ public abstract class Algorithm extends Observable {
     @Getter protected String name = "";
     protected final static ResourceBundle strings =
             ResourceBundle.getBundle("strings");
-    protected Random randomizer = new Random();
     private final static Logger logger = Logger.getLogger(Algorithm.class);
 
     /**
@@ -58,32 +57,25 @@ public abstract class Algorithm extends Observable {
     }
 
     /**
-     * Generate a random encryption key between -128 and 127
+     * Generate an encryption key
      * @return encryption key
      */
-     protected Key generateKey() {
-        // randomize a key between -128 and 127 (1 byte) and return it
-        byte key = (byte)(randomizer.nextInt(2*Byte.MAX_VALUE + 2)
-                + Byte.MIN_VALUE);
-        return new Key(key);
-    }
+     protected abstract Key generateKey();
 
     /**
      * Compute the decryption key using its respective encryption key.
-     * By default, encryption key == decryption key
      * @param encryptionKey encryption key
      * @return decryption key
-     * @throws IOException when key is invalid
+     * @throws IOException when encryption key is invalid
      */
-    protected Key getDecryptionKey(Key encryptionKey) throws Exception {
-        return encryptionKey;
-    }
+    protected abstract Key getDecryptionKey(Key encryptionKey) throws Exception;
 
     /**
      * Encrypt a byte with any encryption algorithm.
      * @param b input byte
      * @param idx byte's index in file
-     *@param key encryption key  @return encrypted byte.
+     * @param key encryption key
+     * @return encrypted byte.
      * @throws IOException when key is invalid
      */
     protected abstract byte encryptByte(byte b, int idx, Key key)
@@ -101,16 +93,17 @@ public abstract class Algorithm extends Observable {
             throws IOException;
 
     /**
-     * Encrypt/Decrypt a single normal file (not directory)
+     * Encrypt/Decrypt a single normal file (not directory) and log
+     * the result using "log4j".
      * @param file source file
      * @param key key
      * @param destinationFilePath filepath of the outcome
-     * @param actionCode "e" for encryption / "d" for decryption
+     * @param actionCode encryption / decryption
      * @return how much the process took (in milliseconds)
      * @throws Exception when I/O error occurs/when unexpected error occurs
      */
     protected double execAlgoOnFile(File file, Key key, String destinationFilePath,
-                                  String actionCode) throws Exception {
+                                    String actionCode) throws Exception {
         try {
             // log the start of the operation
             logger.info(strings.getString("operStartMsg")
@@ -157,7 +150,7 @@ public abstract class Algorithm extends Observable {
      * @param key key
      * @param processedDirectory directory that will include
      *                           processed files (encrypted/decrypted)
-     * @param actionCode "e" for encryption / "d" for decryption
+     * @param actionCode encryption / decryption
      * @param syncCode "s" for sync / "a" for async
      * @return how much the process took (in milliseconds)
      * @throws Exception when invalid input is entered/ unexpected error
@@ -250,6 +243,7 @@ public abstract class Algorithm extends Observable {
         // measure time and convert it from nanoseconds to milliseconds
         return (double)(System.nanoTime() - startTime) / 1000000;
     }
+
     /**
      * Encrypt an input file/directory
      * and write the result in a new file/directory.
@@ -280,7 +274,7 @@ public abstract class Algorithm extends Observable {
                 String syncCode = UserInputUtils.getValidUserInput(
                         Arrays.asList(strings.getString("syncOpt"),
                                 strings.getString("asyncOpt")), reader);
-                // notify observers that encryption started and measure time
+                // notify observers that encryption started
                 setChanged();
                 notifyObservers(strings.getString("encStartMsg"));
                 // create encrypted sub-directory and encrypt input directory
@@ -353,7 +347,7 @@ public abstract class Algorithm extends Observable {
                 String syncCode = UserInputUtils.getValidUserInput(
                         Arrays.asList(strings.getString("syncOpt"),
                                 strings.getString("asyncOpt")), reader);
-                // notify observers that decryption started and measure time
+                // notify observers that decryption started
                 setChanged();
                 notifyObservers(strings.getString("decStartMsg"));
                 // create decrypted sub-directory and decrypt input directory

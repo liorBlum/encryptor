@@ -8,7 +8,6 @@ package TestStructure;
 
 import Structure.Menu;
 import org.junit.Test;
-
 import java.io.*;
 import java.util.ResourceBundle;
 

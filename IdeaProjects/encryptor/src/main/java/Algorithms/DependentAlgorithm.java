@@ -19,7 +19,6 @@ public abstract class DependentAlgorithm extends Algorithm {
             ResourceBundle.getBundle("algorithms_names");
 
     /**
-     * /**
      * Algorithm protected constructor that is used to set the Algorithm's name
      * @param name Algorithm's name
      */
@@ -53,7 +52,7 @@ public abstract class DependentAlgorithm extends Algorithm {
                 String algoCode = algoCodes.nextElement();
                 Class algoClass = Class.forName(strings.getString("algoPack")
                         + algoClasses.getString(algoCode));
-                if (algoClass.getSuperclass() == (Algorithm.class)) {
+                if (algoClass.getSuperclass() == (IndependentAlgorithm.class)) {
                     System.out.println("For " + algoNames.getString(algoCode)
                             + " Enter: " + algoCode);
                 }
@@ -70,18 +69,18 @@ public abstract class DependentAlgorithm extends Algorithm {
      * of algorithms calls
      * @return independent algorithm (object)
      */
-    protected Algorithm getIndepAlgorithmFromUser(Scanner reader) {
+    protected IndependentAlgorithm getIndepAlgorithmFromUser(Scanner reader) {
         while (true) {
             try {
                 String algoCode = UserInputUtils.getValidUserInput(
                         Collections.list(algoClasses.getKeys()), reader);
                 Class algoClass = Class.forName(strings.getString("algoPack")
                         + algoClasses.getString(algoCode));
-                if (algoClass.getSuperclass() == (Algorithm.class)) {
+                if (algoClass.getSuperclass() == (IndependentAlgorithm.class)) {
                     // get the algorithm object from the given algoCode
                     String algoClassName = strings.getString("algoPack")
                             + algoClasses.getString(algoCode);
-                    return (Algorithm)(
+                    return (IndependentAlgorithm) (
                             Class.forName(algoClassName).newInstance());
                 } else {
                     // if input algorithm is dependent, throw an exception
