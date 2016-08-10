@@ -29,13 +29,10 @@ public abstract class Algorithm extends Observable {
      * @return algorithm's name
      */
     @Getter protected String name = "";
-    private String syncOpt = "s";
-    private String asyncOpt = "a";
     protected final static ResourceBundle strings =
             ResourceBundle.getBundle("strings");
     protected Random randomizer = new Random();
     private final static Logger logger = Logger.getLogger(Algorithm.class);
-    private final static String ls = System.getProperty("line.separator");
 
     /**
      * Algorithm protected constructor that is used to set the Algorithm's name
@@ -145,7 +142,7 @@ public abstract class Algorithm extends Observable {
             logger.info(strings.getString("operEndMsg")
                     + " " + file.getName()
                     + " in " + elapsedTime
-                    + "milliseconds");
+                    + " milliseconds");
             return elapsedTime;
         } catch (Exception e) {
             // write error in log file
@@ -217,7 +214,7 @@ public abstract class Algorithm extends Observable {
             throw new IllegalArgumentException(
                     strings.getString("unexpectedErrorMsg"));
         }
-        if (syncCode.equals(syncOpt)) {
+        if (syncCode.equals(strings.getString("syncOpt"))) {
             // process the directory file-by-file synchronously
             for (final File file : files) {
                 if (file.canRead() && file.isFile()) {
@@ -226,7 +223,7 @@ public abstract class Algorithm extends Observable {
                     dr.addFileReport(fr);
                 }
             }
-        } else if(syncCode.equals(asyncOpt)) {
+        } else if(syncCode.equals(strings.getString("asyncOpt"))) {
             // process the directory using threads
             // executor uses 1 element queue so that files never wait
             ThreadPoolExecutor executor = new ThreadPoolExecutor(
@@ -251,7 +248,7 @@ public abstract class Algorithm extends Observable {
                 dr, new File(strings.getString("xmlReportFile")),
                 new Class[]{FileReport.class, DirectoryReport.class});
         // measure time and convert it from nanoseconds to milliseconds
-        return  (double)(System.nanoTime() - startTime) / 1000000;
+        return (double)(System.nanoTime() - startTime) / 1000000;
     }
     /**
      * Encrypt an input file/directory
@@ -281,7 +278,8 @@ public abstract class Algorithm extends Observable {
                 // get sync/async from the user
                 System.out.println(strings.getString("syncText"));
                 String syncCode = UserInputUtils.getValidUserInput(
-                        Arrays.asList(syncOpt, asyncOpt), reader);
+                        Arrays.asList(strings.getString("syncOpt"),
+                                strings.getString("asyncOpt")), reader);
                 // notify observers that encryption started and measure time
                 setChanged();
                 notifyObservers(strings.getString("encStartMsg"));
@@ -353,7 +351,8 @@ public abstract class Algorithm extends Observable {
                 // get sync/async from the user
                 System.out.println(strings.getString("syncText"));
                 String syncCode = UserInputUtils.getValidUserInput(
-                        Arrays.asList(syncOpt, asyncOpt), reader);
+                        Arrays.asList(strings.getString("syncOpt"),
+                                strings.getString("asyncOpt")), reader);
                 // notify observers that decryption started and measure time
                 setChanged();
                 notifyObservers(strings.getString("decStartMsg"));

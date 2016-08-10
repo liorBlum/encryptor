@@ -10,7 +10,7 @@ import java.io.*;
  */
 public class TestCaesarEncryptor extends AbstractAlgoTest {
     public TestCaesarEncryptor() {
-        super(new CaesarAlgo(), "Caesar Algorithm");
+        super(new CaesarAlgo());
     }
     @Test
     public void testCaesarEncryption() throws IOException{

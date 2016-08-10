@@ -18,7 +18,7 @@ public class SplitAlgo extends DependentAlgorithm {
      * @param algorithm algorithm
      * @return algorithm
      */
-    @Getter @Setter private Algorithm algorithm;
+    @Getter @Setter private Algorithm algorithm = null;
 
     /**
      * Algorithm constructor that is used to set the Algorithm's name
@@ -28,9 +28,11 @@ public class SplitAlgo extends DependentAlgorithm {
     }
     @Override
     protected void updateAlgorithmMembers(Scanner reader) throws IOException {
-        System.out.println(strings.getString("splitMsg"));
-        showIndepAlgorithmsSelection();
-        algorithm = getIndepAlgorithmFromUser(reader);
+        if (algorithm == null) {
+            System.out.println(strings.getString("splitMsg"));
+            showIndepAlgorithmsSelection();
+            algorithm = getIndepAlgorithmFromUser(reader);
+        }
     }
 
     @Override

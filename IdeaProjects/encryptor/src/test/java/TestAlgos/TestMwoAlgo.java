@@ -10,7 +10,7 @@ import java.io.IOException;
  */
 public class TestMwoAlgo extends AbstractAlgoTest {
     public TestMwoAlgo() {
-        super(new MwoAlgo(), "Multiplication Algorithm");
+        super(new MwoAlgo());
     }
     @Test
     public void testMwoEncryption() throws IOException {

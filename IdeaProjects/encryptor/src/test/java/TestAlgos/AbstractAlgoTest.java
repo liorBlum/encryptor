@@ -1,6 +1,8 @@
 package TestAlgos;
 
 import Algorithms.Algorithm;
+import Structure.AlgoExecutor;
+
 import java.io.*;
 import java.util.*;
 
@@ -11,30 +13,21 @@ import static org.junit.Assert.assertTrue;
  * Abstract class for encryption algorithms tests.
  */
 public abstract class AbstractAlgoTest {
+    protected AlgoExecutor executor;
     protected File exampleFolder = new File("exampleFolder");
     protected File exampleFile1 = new File(exampleFolder, "example_file1.txt");
     protected File exampleFile2 = new File(exampleFolder, "example_file2.txt");
     protected final InputStream defInStream = System.in;
     protected final ResourceBundle strings = ResourceBundle.getBundle("strings");
-    protected Algorithm algorithm;
-    protected String algoName;
     protected final String ls = System.getProperty("line.separator");
-    protected final ResourceBundle independentAlgosCodes =
-            ResourceBundle.getBundle("indep_algorithms");
 
     /**
-     * A constructor for all encryption tests.
+     * A constructor for all encryption tests. Builds an AlgoExecutor
+     * with the input Algorithm.
      * @param algorithm encryption algorithm to be tested
-     * @param name algorithm's name
      */
-    protected AbstractAlgoTest(Algorithm algorithm, String name) {
-        this.algoName = name;
-        this.algorithm = algorithm;
-        algorithm.addObserver(new Observer() {
-            public void update(Observable o, Object arg) {
-                System.out.println(arg);
-            }
-        });
+    protected AbstractAlgoTest(Algorithm algorithm) {
+        this.executor = new AlgoExecutor(algorithm);
     }
 
     /**
@@ -87,8 +80,12 @@ public abstract class AbstractAlgoTest {
      * @return input bytes
      */
     protected byte[] getInputToSend() {
-        return (exampleFolder.getPath() + "/"
-                + strings.getString("keyFileName")).getBytes();
+        String syncOption = strings.getString("syncOpt");
+        // test synchronous execution (encryption and decryption)
+        return (syncOption + ls
+                + exampleFolder.getPath() + "/"
+                + strings.getString("keyFileName") + ls
+                + syncOption).getBytes();
     }
 
     /**
@@ -97,20 +94,20 @@ public abstract class AbstractAlgoTest {
      * @throws IOException
      */
     protected void testAlgorithm() throws IOException {
-        System.out.println("Testing " + algoName + "...");
+        System.out.println("Testing " + executor.getAlgoName() + "...");
         createExampleFiles();
         InputStream isIn = new ByteArrayInputStream(getInputToSend());
         System.setIn(isIn);
         Scanner reader = new Scanner(System.in);
         // encrypt the example files
-        double elapsedTime = algorithm.encrypt(exampleFolder, reader);
+        double elapsedTime = executor.encrypt(exampleFolder, reader);
         // test if encryption's time was measured correctly
         assertTrue(elapsedTime > 0);
         File encryptedFolder = new File(exampleFolder, "encrypted");
         File encryptedFile1 = new File(encryptedFolder, exampleFile1.getName());
         File encryptedFile2 = new File(encryptedFolder, exampleFile2.getName());
         // decrypt the encrypted file (with same algorithm and encryption key)
-        elapsedTime = algorithm.decrypt(encryptedFolder, reader);
+        elapsedTime = executor.decrypt(encryptedFolder, reader);
         System.setIn(defInStream);
         isIn.close();
         // delete unnecessary key
@@ -133,6 +130,7 @@ public abstract class AbstractAlgoTest {
         decryptedFile2.delete();
         decryptedFolder.delete();
         encryptedFolder.delete();
-        System.out.println(algoName + " test completed successfully.\n");
+        System.out.println(executor.getAlgoName()
+                + " test completed successfully.\n");
     }
 }

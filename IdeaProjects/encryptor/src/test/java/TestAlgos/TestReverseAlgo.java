@@ -10,15 +10,17 @@ import java.io.IOException;
  */
 public class TestReverseAlgo extends AbstractAlgoTest {
     public TestReverseAlgo() {
-        super(new ReverseAlgo(), "Reverse Algorithm");
+        super(new ReverseAlgo());
     }
     @Override
     protected byte[] getInputToSend() {
-        String algoDef = independentAlgosCodes.getString(
-                "Multiplication Algorithm");
+        String asyncOption = strings.getString("asyncOpt");
+        String algoDef = "mwo";
         String keyPath = exampleFolder.getPath() + "/"
                 + strings.getString("keyFileName");
-        return (algoDef + ls + algoDef + ls + keyPath).getBytes();
+        // test asynchronous execution (encryption and decryption)
+        return (algoDef + ls + asyncOption
+                + ls + keyPath + ls + asyncOption).getBytes();
     }
 
     @Test

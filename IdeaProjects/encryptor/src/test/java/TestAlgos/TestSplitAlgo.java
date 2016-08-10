@@ -10,15 +10,17 @@ import java.io.IOException;
  */
 public class TestSplitAlgo extends AbstractAlgoTest {
     public TestSplitAlgo() {
-        super(new SplitAlgo(), "Split Algorithm");
+        super(new SplitAlgo());
     }
     @Override
     protected byte[] getInputToSend() {
-        String algoDef = independentAlgosCodes.getString(
-                "Multiplication Algorithm");
+        String asyncOption = strings.getString("asyncOpt");
+        String algoDef = "mwo";
         String keyPath = exampleFolder.getPath() + "/"
                 + strings.getString("keyFileName");
-        return (algoDef + ls + algoDef + ls + keyPath).getBytes();
+        // test asynchronous execution (encryption and decryption)
+        return (algoDef + ls + asyncOption
+                + ls + keyPath + ls + asyncOption).getBytes();
     }
 
     @Test

@@ -12,17 +12,18 @@ import java.io.InputStream;
  */
 public class TestDoubleAlgo extends AbstractAlgoTest {
     public TestDoubleAlgo() {
-        super(new DoubleAlgo(), "Double Algorithm");
+        super(new DoubleAlgo());
     }
 
     @Override
     protected byte[] getInputToSend() {
-        String twoAlgosDef = independentAlgosCodes.getString("Caesar Algorithm")
-                + ls
-                + independentAlgosCodes.getString("XOR Algorithm");
+        String asyncOption = strings.getString("asyncOpt");
+        String twoAlgosDef = "csr" + ls + "xor";
         String keyPath = exampleFolder.getPath() + "/"
                 + strings.getString("keyFileName");
-        return (twoAlgosDef + ls + twoAlgosDef + ls + keyPath).getBytes();
+        // test asynchronous execution (encryption and decryption)
+        return (twoAlgosDef + ls + asyncOption
+                + ls + keyPath + ls + asyncOption).getBytes();
     }
 
     @Test

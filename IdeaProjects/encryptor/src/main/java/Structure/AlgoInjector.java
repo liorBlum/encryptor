@@ -83,8 +83,7 @@ public class AlgoInjector extends AbstractModule{
                             Class.forName(algoClassName).newInstance());
                 }
             }  catch (JAXBException e) {
-                //System.out.println(e.getMessage());
-                e.printStackTrace();
+                System.out.println(e.getMessage());
             }  catch (ClassNotFoundException e) {
                 System.out.println(strings.getString("algoNotFound"));
             } catch (Exception e) {
